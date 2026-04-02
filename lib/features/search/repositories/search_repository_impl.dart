@@ -35,6 +35,18 @@ class SearchRepositoryImpl implements SearchRepository {
   }
 
   @override
+  Future<String?> resolveUsername(String username) async {
+    if (username.isEmpty) return null;
+    final snap = await _firestore
+        .collection(FirestoreCollections.users)
+        .where('username', isEqualTo: username.toLowerCase().trim())
+        .limit(1)
+        .get();
+    if (snap.docs.isEmpty) return null;
+    return snap.docs.first.id;
+  }
+
+  @override
   Future<List<SearchHistoryItem>> getSearchHistory() async {
     final raw = _prefs.getStringList(_historyKey) ?? [];
     return raw

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/widgets/app_error_widget.dart';
 import '../../../../core/widgets/loading_indicator.dart';
+import '../../../../core/widgets/shimmer_widgets.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../../../auth/presentation/cubits/auth_state.dart';
 import '../../../board/presentation/cubits/board_cubit.dart';
@@ -93,7 +94,7 @@ class _PublicProfilePageState extends State<PublicProfilePage> {
       body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, profileState) {
           if (profileState is ProfileLoading || profileState is ProfileInitial) {
-            return const LoadingIndicator();
+            return const ProfileHeaderShimmer();
           }
           if (profileState is ProfileError) {
             return AppErrorWidget(

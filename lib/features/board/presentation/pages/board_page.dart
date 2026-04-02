@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/widgets/app_error_widget.dart';
-import '../../../../core/widgets/loading_indicator.dart';
+import '../../../../core/widgets/shimmer_widgets.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../../../auth/presentation/cubits/auth_state.dart';
 import '../cubits/board_cubit.dart';
@@ -30,7 +31,7 @@ class _BoardPageState extends State<BoardPage> {
 
   void _share(String username) {
     Share.share(
-      'Напиши мне анонимно: wtf://profile/$username',
+      'Напиши мне анонимно: wtf://u/$username',
       subject: 'Мой профиль WTF',
     );
   }
@@ -90,7 +91,7 @@ class _BoardPageState extends State<BoardPage> {
       body: BlocBuilder<BoardCubit, BoardState>(
         builder: (context, state) {
           return switch (state) {
-            BoardInitial() || BoardLoading() => const LoadingIndicator(),
+            BoardInitial() || BoardLoading() => const BoardShimmer(),
             BoardError(:final message) => AppErrorWidget(
                 message: message,
                 onRetry: () {
@@ -131,7 +132,10 @@ class _BoardPageState extends State<BoardPage> {
                               : () => context
                                   .read<BoardCubit>()
                                   .markAsRead(comment.id),
-                        );
+                        )
+                            .animate(delay: Duration(milliseconds: 40 * index))
+                            .fadeIn(duration: 200.ms)
+                            .slideY(begin: 0.08, end: 0, duration: 200.ms);
                       },
                     ),
                   ),

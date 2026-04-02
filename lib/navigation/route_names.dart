@@ -12,6 +12,9 @@ class RouteNames {
   static const String favorites = 'favorites';
   static const String profile = 'profile';
 
+  // Deep link
+  static const String deepLink = 'deep-link';
+
   // Nested
   static const String publicProfile = 'public-profile';
   static const String sendComment = 'send-comment';

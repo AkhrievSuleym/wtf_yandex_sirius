@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/widgets/app_error_widget.dart';
-import '../../../../core/widgets/loading_indicator.dart';
+import '../../../../core/widgets/shimmer_widgets.dart';
 import '../cubits/search_cubit.dart';
 import '../cubits/search_state.dart';
 import '../widgets/search_history_list.dart';
@@ -64,7 +65,7 @@ class _SearchPageState extends State<SearchPage> {
                 },
                 onClear: () => context.read<SearchCubit>().clearHistory(),
               ),
-            SearchLoading() => const LoadingIndicator(),
+            SearchLoading() => const SearchShimmer(),
             SearchEmpty(:final query) => _EmptyResults(query: query),
             SearchResults(:final results) => ListView.builder(
                 itemCount: results.length,
@@ -78,7 +79,10 @@ class _SearchPageState extends State<SearchPage> {
                           .addProfileToHistory(profile);
                       _navigateToProfile(context, profile.uid);
                     },
-                  );
+                  )
+                      .animate(delay: Duration(milliseconds: 40 * i))
+                      .fadeIn(duration: 200.ms)
+                      .slideX(begin: 0.05, end: 0, duration: 200.ms);
                 },
               ),
             SearchError(:final message) => AppErrorWidget(

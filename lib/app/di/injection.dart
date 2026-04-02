@@ -28,7 +28,15 @@ final getIt = GetIt.instance;
 Future<void> setupDependencies() async {
   // External
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
-  getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
+  getIt.registerLazySingleton<FirebaseFirestore>(() {
+    final firestore = FirebaseFirestore.instance;
+    // Enable offline persistence with 100 MB cache
+    firestore.settings = const Settings(
+      persistenceEnabled: true,
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+    );
+    return firestore;
+  });
   getIt.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
 
   final prefs = await SharedPreferences.getInstance();

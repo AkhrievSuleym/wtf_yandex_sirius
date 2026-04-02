@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/firestore_collections.dart';
+import '../../../core/utils/app_logger.dart';
 import '../models/comment_model.dart';
 import 'board_repository.dart';
 
 class BoardRepositoryImpl implements BoardRepository {
+  static const _tag = 'BoardRepository';
+
   final FirebaseFirestore _firestore;
 
   BoardRepositoryImpl({FirebaseFirestore? firestore})
@@ -11,24 +14,31 @@ class BoardRepositoryImpl implements BoardRepository {
 
   @override
   Stream<List<CommentModel>> watchBoardComments(String ownerId) {
+    AppLogger.d(_tag, 'watchBoardComments: ownerId=$ownerId');
     return _firestore
         .collection(FirestoreCollections.comments)
         .where('boardOwnerId', isEqualTo: ownerId)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snap) => snap.docs.map(CommentModel.fromFirestore).toList());
+        .map((snap) {
+      AppLogger.d(_tag, 'watchBoardComments: received ${snap.docs.length} comments');
+      return snap.docs.map(CommentModel.fromFirestore).toList();
+    });
   }
 
   @override
   Future<void> deleteComment(String commentId) async {
+    AppLogger.i(_tag, 'deleteComment: id=$commentId');
     await _firestore
         .collection(FirestoreCollections.comments)
         .doc(commentId)
         .delete();
+    AppLogger.d(_tag, 'deleteComment: done');
   }
 
   @override
   Future<void> markAsRead(String commentId) async {
+    AppLogger.d(_tag, 'markAsRead: id=$commentId');
     await _firestore
         .collection(FirestoreCollections.comments)
         .doc(commentId)
@@ -41,13 +51,17 @@ class BoardRepositoryImpl implements BoardRepository {
     required String reactionKey,
     required String userId,
   }) async {
+    AppLogger.d(_tag, 'toggleReaction: commentId=$commentId key=$reactionKey');
     final ref = _firestore
         .collection(FirestoreCollections.comments)
         .doc(commentId);
 
     await _firestore.runTransaction((tx) async {
       final snap = await tx.get(ref);
-      if (!snap.exists) return;
+      if (!snap.exists) {
+        AppLogger.w(_tag, 'toggleReaction: comment not found id=$commentId');
+        return;
+      }
 
       final data = snap.data()!;
       final reactedBy = Map<String, dynamic>.from(data['reactedBy'] as Map? ?? {});
@@ -65,11 +79,8 @@ class BoardRepositoryImpl implements BoardRepository {
       }
 
       reactedBy[reactionKey] = userList;
-
-      tx.update(ref, {
-        'reactions': reactions,
-        'reactedBy': reactedBy,
-      });
+      tx.update(ref, {'reactions': reactions, 'reactedBy': reactedBy});
+      AppLogger.d(_tag, 'toggleReaction: ${hasReacted ? 'removed' : 'added'} $reactionKey');
     });
   }
 }

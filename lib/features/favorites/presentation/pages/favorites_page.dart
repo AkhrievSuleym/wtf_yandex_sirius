@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/widgets/app_error_widget.dart';
-import '../../../../core/widgets/loading_indicator.dart';
+import '../../../../core/widgets/shimmer_widgets.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../../../auth/presentation/cubits/auth_state.dart';
 import '../cubits/favorites_cubit.dart';
@@ -34,7 +35,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
       body: BlocBuilder<FavoritesCubit, FavoritesState>(
         builder: (context, state) {
           return switch (state) {
-            FavoritesInitial() || FavoritesLoading() => const LoadingIndicator(),
+            FavoritesInitial() || FavoritesLoading() => const FavoritesShimmer(),
             FavoritesError(:final message) => AppErrorWidget(
                 message: message,
                 onRetry: () {
@@ -64,7 +65,10 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                 .removeFromFavorites(profile.uid);
                           }
                         },
-                      );
+                      )
+                          .animate(delay: Duration(milliseconds: 40 * i))
+                          .fadeIn(duration: 200.ms)
+                          .slideX(begin: 0.05, end: 0, duration: 200.ms);
                     },
                   ),
           };

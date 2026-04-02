@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -37,13 +38,13 @@ class WelcomePage extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
+              ).animate().fadeIn(duration: 400.ms).scale(begin: const Offset(0.8, 0.8), duration: 400.ms),
               const SizedBox(height: 32),
               Text(
                 'What They Feel',
                 style: theme.textTheme.headlineMedium,
                 textAlign: TextAlign.center,
-              ),
+              ).animate(delay: 200.ms).fadeIn(duration: 300.ms).slideY(begin: 0.2, end: 0, duration: 300.ms),
               const SizedBox(height: 12),
               Text(
                 'Анонимные сообщения.\nЧестная обратная связь.',
@@ -51,12 +52,12 @@ class WelcomePage extends StatelessWidget {
                   color: AppColors.textSecondaryLight,
                 ),
                 textAlign: TextAlign.center,
-              ),
+              ).animate(delay: 350.ms).fadeIn(duration: 300.ms).slideY(begin: 0.2, end: 0, duration: 300.ms),
               const Spacer(flex: 3),
               AppButton(
                 label: 'Начать',
                 onPressed: () => context.goNamed(RouteNames.signUp),
-              ),
+              ).animate(delay: 500.ms).fadeIn(duration: 300.ms).slideY(begin: 0.3, end: 0, duration: 300.ms),
               const SizedBox(height: 32),
             ],
           ),

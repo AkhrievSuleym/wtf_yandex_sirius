@@ -38,6 +38,18 @@ class Validators {
     if (value.length > AppConstants.commentMaxLength) {
       return 'Максимум ${AppConstants.commentMaxLength} символов';
     }
+    if (_containsProfanity(value)) {
+      return 'Сообщение содержит запрещённые слова';
+    }
     return null;
+  }
+
+  static bool _containsProfanity(String text) {
+    final lower = text.toLowerCase();
+    const banned = [
+      'хуй', 'пизда', 'пиздец', 'ёбаный', 'еблан',
+      'fuck', 'shit', 'bitch', 'cunt', 'nigger',
+    ];
+    return banned.any(lower.contains);
   }
 }

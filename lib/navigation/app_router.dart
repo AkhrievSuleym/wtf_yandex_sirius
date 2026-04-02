@@ -20,6 +20,7 @@ import '../features/profile/presentation/pages/public_profile_page.dart';
 import '../features/profile/presentation/pages/settings_page.dart';
 import '../features/search/presentation/cubits/search_cubit.dart';
 import '../features/search/presentation/pages/search_page.dart';
+import '../features/deep_link/presentation/pages/deep_link_page.dart';
 import 'route_names.dart';
 import 'shell_route.dart';
 
@@ -52,6 +53,14 @@ GoRouter createRouter(AuthCubit authCubit) {
       return null;
     },
     routes: [
+      // Deep link: wtf://u/{username}
+      GoRoute(
+        path: '/u/:username',
+        name: RouteNames.deepLink,
+        builder: (_, state) => DeepLinkPage(
+          username: state.pathParameters['username']!,
+        ),
+      ),
       GoRoute(
         path: '/welcome',
         name: RouteNames.welcome,
