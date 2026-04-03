@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../app/theme/app_colors.dart';
+import '../features/auth/presentation/cubits/auth_cubit.dart';
+import '../features/auth/presentation/cubits/auth_state.dart';
+import '../features/profile/presentation/cubits/profile_cubit.dart';
 
 class ScaffoldWithBottomNav extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
@@ -32,6 +36,12 @@ class ScaffoldWithBottomNav extends StatelessWidget {
             index,
             initialLocation: index == navigationShell.currentIndex,
           );
+          if (index == ShellBranches.profile) {
+            final auth = context.read<AuthCubit>().state;
+            if (auth is AuthAuthenticated) {
+              context.read<ProfileCubit>().loadProfile(auth.user.uid);
+            }
+          }
         },
       ),
     );

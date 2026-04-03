@@ -11,7 +11,7 @@ import 'search_repository.dart';
 
 class SearchRepositoryImpl implements SearchRepository {
   static const _tag = 'SearchRepository';
-  static const _historyKey = 'search_history';
+  static const _historyKeyLegacy = 'search_history';
 
   final ApiClient _api;
   final SharedPreferences _prefs;
@@ -19,6 +19,22 @@ class SearchRepositoryImpl implements SearchRepository {
   SearchRepositoryImpl({required ApiClient api, required SharedPreferences prefs})
       : _api = api,
         _prefs = prefs;
+
+  String _historyKeyFor(String accountUid) => 'search_history_$accountUid';
+
+  Future<List<String>> _readHistoryRaw(String accountUid) async {
+    final key = _historyKeyFor(accountUid);
+    var raw = _prefs.getStringList(key);
+    if (raw == null || raw.isEmpty) {
+      final legacy = _prefs.getStringList(_historyKeyLegacy);
+      if (legacy != null && legacy.isNotEmpty) {
+        await _prefs.setStringList(key, legacy);
+        await _prefs.remove(_historyKeyLegacy);
+        raw = legacy;
+      }
+    }
+    return raw ?? [];
+  }
 
   @override
   Future<List<ProfileModel>> searchByUsername(String query) async {
@@ -43,8 +59,8 @@ class SearchRepositoryImpl implements SearchRepository {
   }
 
   @override
-  Future<List<SearchHistoryItem>> getSearchHistory() async {
-    final raw = _prefs.getStringList(_historyKey) ?? [];
+  Future<List<SearchHistoryItem>> getSearchHistory(String accountUid) async {
+    final raw = await _readHistoryRaw(accountUid);
     return raw
         .map((e) => SearchHistoryItem.fromJson(
             jsonDecode(e) as Map<String, dynamic>))
@@ -52,20 +68,20 @@ class SearchRepositoryImpl implements SearchRepository {
   }
 
   @override
-  Future<void> addToHistory(SearchHistoryItem item) async {
-    final history = await getSearchHistory();
+  Future<void> addToHistory(String accountUid, SearchHistoryItem item) async {
+    final history = await getSearchHistory(accountUid);
     history.removeWhere(
         (h) => item.viewedUid != null && h.viewedUid == item.viewedUid);
     history.insert(0, item);
     final trimmed = history.take(AppConstants.searchHistoryMaxItems).toList();
     await _prefs.setStringList(
-      _historyKey,
+      _historyKeyFor(accountUid),
       trimmed.map((e) => jsonEncode(e.toJson())).toList(),
     );
   }
 
   @override
-  Future<void> clearHistory() async {
-    await _prefs.remove(_historyKey);
+  Future<void> clearHistory(String accountUid) async {
+    await _prefs.remove(_historyKeyFor(accountUid));
   }
 }

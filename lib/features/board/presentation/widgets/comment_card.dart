@@ -9,7 +9,7 @@ class CommentCard extends StatelessWidget {
   final CommentModel comment;
   final String currentUserId;
   final bool isOwner;
-  final void Function(String reactionKey) onToggleReaction;
+  final Future<void> Function(String reactionKey) onToggleReaction;
   final VoidCallback onDelete;
   final VoidCallback? onTap;
 
@@ -34,6 +34,15 @@ class CommentCard extends StatelessWidget {
       },
     );
     onTap?.call();
+  }
+
+  static const _newBadgeMaxAge = Duration(minutes: 5);
+
+  bool get _showNewBadge {
+    if (comment.isRead) return false;
+    final cutoff =
+        DateTime.now().toUtc().subtract(_newBadgeMaxAge);
+    return comment.createdAt.toUtc().isAfter(cutoff);
   }
 
   @override
@@ -75,7 +84,7 @@ class CommentCard extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  if (!comment.isRead)
+                  if (_showNewBadge)
                     Container(
                       margin: const EdgeInsets.only(right: 8),
                       padding: const EdgeInsets.symmetric(

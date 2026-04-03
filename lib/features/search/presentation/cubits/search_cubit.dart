@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../auth/repositories/auth_repository.dart';
 import '../../../profile/models/profile_model.dart';
 import '../../models/search_history_item.dart';
 import '../../repositories/search_repository.dart';
@@ -10,14 +11,26 @@ class SearchCubit extends Cubit<SearchState> {
   static const _tag = 'SearchCubit';
 
   final SearchRepository _searchRepository;
+  final AuthRepository _authRepository;
   Timer? _debounce;
 
-  SearchCubit(this._searchRepository) : super(const SearchInitial());
+  SearchCubit(this._searchRepository, this._authRepository)
+      : super(const SearchInitial());
+
+  Future<String?> _accountUid() async {
+    final user = await _authRepository.getCurrentUser();
+    return user?.uid;
+  }
 
   Future<void> loadHistory() async {
     AppLogger.d(_tag, 'loadHistory');
     try {
-      final history = await _searchRepository.getSearchHistory();
+      final uid = await _accountUid();
+      if (uid == null || uid.isEmpty) {
+        emit(const SearchInitial());
+        return;
+      }
+      final history = await _searchRepository.getSearchHistory(uid);
       AppLogger.d(_tag, 'loadHistory: ${history.length} items');
       emit(SearchInitial(history: history));
     } catch (e) {
@@ -61,6 +74,8 @@ class SearchCubit extends Cubit<SearchState> {
 
   Future<void> addProfileToHistory(ProfileModel profile) async {
     AppLogger.d(_tag, 'addProfileToHistory: @${profile.username}');
+    final uid = await _accountUid();
+    if (uid == null || uid.isEmpty) return;
     final item = SearchHistoryItem(
       query: profile.username,
       viewedUid: profile.uid,
@@ -69,12 +84,17 @@ class SearchCubit extends Cubit<SearchState> {
       viewedAvatarUrl: profile.avatarUrl,
       timestamp: DateTime.now(),
     );
-    await _searchRepository.addToHistory(item);
+    await _searchRepository.addToHistory(uid, item);
   }
 
   Future<void> clearHistory() async {
     AppLogger.i(_tag, 'clearHistory');
-    await _searchRepository.clearHistory();
+    final uid = await _accountUid();
+    if (uid == null || uid.isEmpty) {
+      emit(const SearchInitial());
+      return;
+    }
+    await _searchRepository.clearHistory(uid);
     emit(const SearchInitial());
   }
 

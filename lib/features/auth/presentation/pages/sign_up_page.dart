@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../navigation/route_names.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../cubits/auth_cubit.dart';
 import '../cubits/auth_state.dart';
@@ -26,7 +27,15 @@ class SignUpPage extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          leading: BackButton(onPressed: () => context.pop()),
+          leading: BackButton(
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.goNamed(RouteNames.welcome);
+              }
+            },
+          ),
         ),
         body: SafeArea(
           child: Padding(
@@ -38,7 +47,7 @@ class SignUpPage extends StatelessWidget {
                 Text('Создать аккаунт', style: theme.textTheme.headlineMedium),
                 const SizedBox(height: 8),
                 Text(
-                  'Вход анонимный — никаких email, никаких паролей',
+                  'Вход анонимный — без email и телефона. Пароль можно задать в настройках, иначе при потере устройства аккаунт не восстановить.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: AppColors.textSecondaryLight,
                   ),

@@ -10,9 +10,14 @@ class ProfileCubit extends Cubit<ProfileState> {
 
   ProfileCubit(this._profileRepository) : super(const ProfileInitial());
 
-  Future<void> loadProfile(String uid) async {
-    AppLogger.i(_tag, 'loadProfile: uid=$uid');
-    emit(const ProfileLoading());
+  Future<void> loadProfile(String uid, {bool silent = false}) async {
+    AppLogger.i(_tag, 'loadProfile: uid=$uid silent=$silent');
+    final skipLoadingUi = silent &&
+        state is ProfileLoaded &&
+        (state as ProfileLoaded).profile.uid == uid;
+    if (!skipLoadingUi) {
+      emit(const ProfileLoading());
+    }
     try {
       final profile = await _profileRepository.getProfile(uid);
       AppLogger.i(_tag, 'loadProfile: loaded @${profile.username}');

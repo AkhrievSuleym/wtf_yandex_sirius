@@ -2,19 +2,25 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:wtf_yandex_sirius/features/auth/models/user_model.dart';
 import 'package:wtf_yandex_sirius/features/profile/models/profile_model.dart';
 import 'package:wtf_yandex_sirius/features/search/models/search_history_item.dart';
 import 'package:wtf_yandex_sirius/features/search/presentation/cubits/search_cubit.dart';
 import 'package:wtf_yandex_sirius/features/search/presentation/cubits/search_state.dart';
 import 'package:wtf_yandex_sirius/features/search/repositories/search_repository.dart';
 
+import '../auth/auth_cubit_test.mocks.dart';
 import 'search_cubit_test.mocks.dart';
 
 @GenerateMocks([SearchRepository])
 void main() {
   late MockSearchRepository mockRepo;
+  late MockAuthRepository mockAuth;
 
-  const profile = ProfileModel(
+  const accountUid = 'test_account_uid';
+  final testUser = UserModel.empty(uid: accountUid);
+
+  final profile = ProfileModel(
     uid: 'uid1',
     username: 'alice',
     displayName: 'Alice',
@@ -33,15 +39,19 @@ void main() {
 
   setUp(() {
     mockRepo = MockSearchRepository();
+    mockAuth = MockAuthRepository();
+    when(mockAuth.getCurrentUser()).thenAnswer((_) async => testUser);
   });
+
+  SearchCubit buildCubit() => SearchCubit(mockRepo, mockAuth);
 
   group('SearchCubit.loadHistory', () {
     blocTest<SearchCubit, SearchState>(
       'emits SearchInitial with history items',
       build: () {
-        when(mockRepo.getSearchHistory())
+        when(mockRepo.getSearchHistory(accountUid))
             .thenAnswer((_) async => [historyItem]);
-        return SearchCubit(mockRepo);
+        return buildCubit();
       },
       act: (cubit) => cubit.loadHistory(),
       expect: () => [
@@ -52,8 +62,21 @@ void main() {
     blocTest<SearchCubit, SearchState>(
       'emits empty SearchInitial on error',
       build: () {
-        when(mockRepo.getSearchHistory()).thenThrow(Exception('storage error'));
-        return SearchCubit(mockRepo);
+        when(mockRepo.getSearchHistory(accountUid))
+            .thenThrow(Exception('storage error'));
+        return buildCubit();
+      },
+      act: (cubit) => cubit.loadHistory(),
+      expect: () => [
+        isA<SearchInitial>().having((s) => s.history, 'history', isEmpty),
+      ],
+    );
+
+    blocTest<SearchCubit, SearchState>(
+      'emits empty SearchInitial when not signed in',
+      build: () {
+        when(mockAuth.getCurrentUser()).thenAnswer((_) async => null);
+        return buildCubit();
       },
       act: (cubit) => cubit.loadHistory(),
       expect: () => [
@@ -68,10 +91,9 @@ void main() {
       build: () {
         when(mockRepo.searchByUsername('alice'))
             .thenAnswer((_) async => [profile]);
-        return SearchCubit(mockRepo);
+        return buildCubit();
       },
       act: (cubit) => cubit.onQueryChanged('alice'),
-      // debounce is 300ms; wait for it
       wait: const Duration(milliseconds: 400),
       expect: () => [
         const SearchLoading(),
@@ -84,7 +106,7 @@ void main() {
       build: () {
         when(mockRepo.searchByUsername('xyz'))
             .thenAnswer((_) async => []);
-        return SearchCubit(mockRepo);
+        return buildCubit();
       },
       act: (cubit) => cubit.onQueryChanged('xyz'),
       wait: const Duration(milliseconds: 400),
@@ -98,7 +120,7 @@ void main() {
       'emits [Loading, Error] on repository failure',
       build: () {
         when(mockRepo.searchByUsername(any)).thenThrow(Exception('network'));
-        return SearchCubit(mockRepo);
+        return buildCubit();
       },
       act: (cubit) => cubit.onQueryChanged('fail'),
       wait: const Duration(milliseconds: 400),
@@ -111,8 +133,9 @@ void main() {
     blocTest<SearchCubit, SearchState>(
       'clears query → calls loadHistory',
       build: () {
-        when(mockRepo.getSearchHistory()).thenAnswer((_) async => []);
-        return SearchCubit(mockRepo);
+        when(mockRepo.getSearchHistory(accountUid))
+            .thenAnswer((_) async => []);
+        return buildCubit();
       },
       act: (cubit) => cubit.onQueryChanged(''),
       expect: () => [
@@ -125,8 +148,8 @@ void main() {
     blocTest<SearchCubit, SearchState>(
       'emits empty SearchInitial after clearing',
       build: () {
-        when(mockRepo.clearHistory()).thenAnswer((_) async {});
-        return SearchCubit(mockRepo);
+        when(mockRepo.clearHistory(accountUid)).thenAnswer((_) async {});
+        return buildCubit();
       },
       act: (cubit) => cubit.clearHistory(),
       expect: () => [const SearchInitial()],

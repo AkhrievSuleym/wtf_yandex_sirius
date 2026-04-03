@@ -5,7 +5,7 @@ import '../../../../app/theme/app_colors.dart';
 class ReactionBar extends StatelessWidget {
   final CommentModel comment;
   final String currentUserId;
-  final void Function(String reactionKey) onToggle;
+  final Future<void> Function(String reactionKey) onToggle;
 
   const ReactionBar({
     super.key,
@@ -28,7 +28,9 @@ class ReactionBar extends StatelessWidget {
             emoji: CommentModel.emojiFor(key),
             count: count,
             isActive: isActive,
-            onTap: () => onToggle(key),
+            onTap: () async {
+              await onToggle(key);
+            },
           ),
         );
       }).toList(),
@@ -41,7 +43,7 @@ class _ReactionChip extends StatefulWidget {
   final String emoji;
   final int count;
   final bool isActive;
-  final VoidCallback onTap;
+  final Future<void> Function() onTap;
 
   const _ReactionChip({
     required this.reactionKey,
@@ -92,9 +94,9 @@ class _ReactionChipState extends State<_ReactionChip>
     super.dispose();
   }
 
-  void _handleTap() {
+  Future<void> _handleTap() async {
     _popCtrl.forward(from: 0);
-    widget.onTap();
+    await widget.onTap();
   }
 
   @override
@@ -106,7 +108,7 @@ class _ReactionChipState extends State<_ReactionChip>
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: _handleTap,
+        onTap: () => _handleTap(),
         borderRadius: BorderRadius.circular(22),
         splashColor: tint.withValues(alpha: 0.25),
         highlightColor: tint.withValues(alpha: 0.08),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../app/theme/app_colors.dart';
@@ -8,6 +7,7 @@ import '../../../../core/widgets/app_error_widget.dart';
 import '../../../../core/widgets/shimmer_widgets.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../../../auth/presentation/cubits/auth_state.dart';
+import '../../../profile/presentation/cubits/profile_cubit.dart';
 import '../cubits/board_cubit.dart';
 import '../cubits/board_state.dart';
 import '../widgets/comment_card.dart';
@@ -131,23 +131,30 @@ class _BoardPageState extends State<BoardPage> {
                       itemBuilder: (context, index) {
                         final comment = comments[index];
                         return CommentCard(
+                          key: ValueKey(comment.id),
                           comment: comment,
                           currentUserId: userId,
                           isOwner: true,
-                          onToggleReaction: (key) {
-                            context
-                                .read<BoardCubit>()
-                                .toggleReaction(comment.id, key, userId);
+                          onToggleReaction: (key) async {
+                            await context.read<BoardCubit>().toggleReaction(
+                                  comment.id,
+                                  key,
+                                  userId,
+                                );
+                            if (!context.mounted) return;
+                            if (userId.isNotEmpty) {
+                              context.read<ProfileCubit>().loadProfile(
+                                    userId,
+                                    silent: true,
+                                  );
+                            }
                           },
                           onDelete: () {
                             context
                                 .read<BoardCubit>()
                                 .deleteComment(comment.id);
                           },
-                        )
-                            .animate(delay: Duration(milliseconds: 40 * index))
-                            .fadeIn(duration: 200.ms)
-                            .slideY(begin: 0.08, end: 0, duration: 200.ms);
+                        );
                       },
                     ),
                   ),

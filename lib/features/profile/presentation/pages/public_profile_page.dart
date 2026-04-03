@@ -132,13 +132,22 @@ class _PublicProfilePageState extends State<PublicProfilePage> {
                           itemBuilder: (_, i) {
                             final comment = comments[i];
                             return CommentCard(
+                              key: ValueKey(comment.id),
                               comment: comment,
                               currentUserId: currentUserId,
                               isOwner: false,
-                              onToggleReaction: (key) => context
-                                  .read<BoardCubit>()
-                                  .toggleReaction(
-                                      comment.id, key, currentUserId),
+                              onToggleReaction: (key) async {
+                                await context.read<BoardCubit>().toggleReaction(
+                                      comment.id,
+                                      key,
+                                      currentUserId,
+                                    );
+                                if (!context.mounted) return;
+                                context.read<ProfileCubit>().loadProfile(
+                                      widget.uid,
+                                      silent: true,
+                                    );
+                              },
                               onDelete: () {},
                             );
                           },

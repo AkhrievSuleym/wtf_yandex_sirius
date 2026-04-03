@@ -57,32 +57,35 @@ class MockSearchRepository extends _i1.Mock implements _i2.SearchRepository {
       ) as _i3.Future<String?>);
 
   @override
-  _i3.Future<List<_i5.SearchHistoryItem>> getSearchHistory() =>
+  _i3.Future<List<_i5.SearchHistoryItem>> getSearchHistory(String? accountUid) =>
       (super.noSuchMethod(
         Invocation.method(
           #getSearchHistory,
-          [],
+          [accountUid],
         ),
         returnValue: _i3.Future<List<_i5.SearchHistoryItem>>.value(
             <_i5.SearchHistoryItem>[]),
       ) as _i3.Future<List<_i5.SearchHistoryItem>>);
 
   @override
-  _i3.Future<void> addToHistory(_i5.SearchHistoryItem? item) =>
+  _i3.Future<void> addToHistory(
+    String? accountUid,
+    _i5.SearchHistoryItem? item,
+  ) =>
       (super.noSuchMethod(
         Invocation.method(
           #addToHistory,
-          [item],
+          [accountUid, item],
         ),
         returnValue: _i3.Future<void>.value(),
         returnValueForMissingStub: _i3.Future<void>.value(),
       ) as _i3.Future<void>);
 
   @override
-  _i3.Future<void> clearHistory() => (super.noSuchMethod(
+  _i3.Future<void> clearHistory(String? accountUid) => (super.noSuchMethod(
         Invocation.method(
           #clearHistory,
-          [],
+          [accountUid],
         ),
         returnValue: _i3.Future<void>.value(),
         returnValueForMissingStub: _i3.Future<void>.value(),

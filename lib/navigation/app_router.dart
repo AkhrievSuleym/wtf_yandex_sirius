@@ -116,8 +116,11 @@ GoRouter createRouter(AuthCubit authCubit) {
         },
       ),
       StatefulShellRoute.indexedStack(
-        builder: (_, __, navigationShell) => BlocProvider.value(
-          value: getIt<FavoritesCubit>(),
+        builder: (_, __, navigationShell) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: getIt<FavoritesCubit>()),
+            BlocProvider.value(value: getIt<ProfileCubit>()),
+          ],
           child: ScaffoldWithBottomNav(navigationShell: navigationShell),
         ),
         branches: [
@@ -148,11 +151,8 @@ GoRouter createRouter(AuthCubit authCubit) {
                   GoRoute(
                     path: ':uid',
                     name: RouteNames.publicProfile,
-                    builder: (_, state) => MultiBlocProvider(
-                      providers: [
-                        BlocProvider(create: (_) => getIt<ProfileCubit>()),
-                        BlocProvider(create: (_) => getIt<BoardCubit>()),
-                      ],
+                    builder: (_, state) => BlocProvider(
+                      create: (_) => getIt<BoardCubit>(),
                       child: PublicProfilePage(
                         uid: state.pathParameters['uid']!,
                       ),
@@ -184,11 +184,8 @@ GoRouter createRouter(AuthCubit authCubit) {
                 routes: [
                   GoRoute(
                     path: ':uid',
-                    builder: (_, state) => MultiBlocProvider(
-                      providers: [
-                        BlocProvider(create: (_) => getIt<ProfileCubit>()),
-                        BlocProvider(create: (_) => getIt<BoardCubit>()),
-                      ],
+                    builder: (_, state) => BlocProvider(
+                      create: (_) => getIt<BoardCubit>(),
                       child: PublicProfilePage(
                         uid: state.pathParameters['uid']!,
                       ),
@@ -215,18 +212,12 @@ GoRouter createRouter(AuthCubit authCubit) {
               GoRoute(
                 path: '/profile',
                 name: RouteNames.profile,
-                builder: (_, __) => BlocProvider(
-                  create: (_) => getIt<ProfileCubit>(),
-                  child: const MyProfilePage(),
-                ),
+                builder: (_, __) => const MyProfilePage(),
                 routes: [
                   GoRoute(
                     path: 'settings',
                     name: RouteNames.settings,
-                    builder: (_, __) => BlocProvider(
-                      create: (_) => getIt<ProfileCubit>(),
-                      child: const SettingsPage(),
-                    ),
+                    builder: (_, __) => const SettingsPage(),
                     routes: [
                       GoRoute(
                         path: 'change-password',

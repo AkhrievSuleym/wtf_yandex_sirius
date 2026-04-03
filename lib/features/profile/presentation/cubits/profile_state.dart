@@ -21,7 +21,15 @@ class ProfileLoaded extends ProfileState {
   const ProfileLoaded(this.profile);
 
   @override
-  List<Object?> get props => [profile.uid, profile.isPublic, profile.displayName, profile.bio, profile.avatarUrl];
+  List<Object?> get props => [
+        profile.uid,
+        profile.isPublic,
+        profile.displayName,
+        profile.bio,
+        profile.avatarUrl,
+        profile.commentCount,
+        profile.reactionStats,
+      ];
 }
 
 class ProfileUpdating extends ProfileState {

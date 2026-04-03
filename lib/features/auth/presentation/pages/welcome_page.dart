@@ -77,10 +77,19 @@ class WelcomePage extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ).animate(delay: 350.ms).fadeIn(duration: 300.ms).slideY(begin: 0.2, end: 0, duration: 300.ms),
+                const SizedBox(height: 20),
+                Text(
+                  'Если не установить пароль в настройках, при потере устройства или переустановке приложения восстановить аккаунт не получится.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondaryLight,
+                    height: 1.35,
+                  ),
+                  textAlign: TextAlign.center,
+                ).animate(delay: 420.ms).fadeIn(duration: 300.ms).slideY(begin: 0.15, end: 0, duration: 300.ms),
                 const Spacer(flex: 3),
                 AppButton(
                   label: 'Начать',
-                  onPressed: () => context.goNamed(RouteNames.signUp),
+                  onPressed: () => context.pushNamed(RouteNames.signUp),
                 ).animate(delay: 500.ms).fadeIn(duration: 300.ms).slideY(begin: 0.3, end: 0, duration: 300.ms),
                 const SizedBox(height: 12),
                 AppButton(
