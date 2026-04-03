@@ -9,26 +9,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality-gate:
-    name: Flutter Format, Analyze & Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed .
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Flutter analyze
-        run: flutter analyze --no-pub
-
-      - name: Run tests with coverage
-        run: flutter test --no-pub --coverage
+  test:
+    name: Tests
+    uses: ./.github/workflows/_tests.yml
