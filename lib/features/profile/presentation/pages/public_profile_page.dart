@@ -30,6 +30,10 @@ class _PublicProfilePageState extends State<PublicProfilePage> {
   @override
   void initState() {
     super.initState();
+    final authState = context.read<AuthCubit>().state;
+    if (authState is AuthAuthenticated) {
+      context.read<FavoritesCubit>().subscribeFavorites(authState.user.uid);
+    }
     context.read<ProfileCubit>().loadProfile(widget.uid);
     context.read<BoardCubit>().subscribeToBoard(widget.uid);
     _checkFavorite();

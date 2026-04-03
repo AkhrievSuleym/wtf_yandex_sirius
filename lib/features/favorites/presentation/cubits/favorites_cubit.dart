@@ -9,7 +9,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   static const _tag = 'FavoritesCubit';
 
   final FavoritesRepository _favoritesRepository;
-  StreamSubscription? _subscription;
+  StreamSubscription<List<ProfileModel>>? _subscription;
   String? _currentUserId;
 
   FavoritesCubit(this._favoritesRepository) : super(const FavoritesInitial());
@@ -35,6 +35,20 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     );
   }
 
+  Future<void> _reload() async {
+    final uid = _currentUserId;
+    if (uid == null || uid.isEmpty) return;
+    try {
+      final list = await _favoritesRepository.fetchFavorites(uid);
+      emit(FavoritesLoaded(list));
+    } catch (e) {
+      AppLogger.e(_tag, '_reload failed', e);
+      emit(FavoritesError(e.toString()));
+    }
+  }
+
+  Future<void> refresh() => _reload();
+
   Future<void> addToFavorites(ProfileModel profile) async {
     if (_currentUserId == null) return;
     AppLogger.i(_tag, 'addToFavorites: @${profile.username}');
@@ -43,6 +57,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
         userId: _currentUserId!,
         profile: profile,
       );
+      await _reload();
     } catch (e) {
       AppLogger.e(_tag, 'addToFavorites failed', e);
       emit(FavoritesError(e.toString()));
@@ -57,6 +72,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
         userId: _currentUserId!,
         favoriteUid: uid,
       );
+      await _reload();
     } catch (e) {
       AppLogger.e(_tag, 'removeFromFavorites failed', e);
       emit(FavoritesError(e.toString()));

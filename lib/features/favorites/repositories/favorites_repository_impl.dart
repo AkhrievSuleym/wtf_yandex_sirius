@@ -12,27 +12,19 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
   FavoritesRepositoryImpl(this._api);
 
   @override
-  Stream<List<ProfileModel>> watchFavorites(String userId) {
-    AppLogger.d(_tag, 'watchFavorites: userId=$userId');
+  Future<List<ProfileModel>> fetchFavorites(String userId) async {
+    AppLogger.d(_tag, 'fetchFavorites: userId=$userId');
+    final response = await _api.dio.get('/users/$userId/favorites');
+    final list = (response.data as List)
+        .map((e) => ProfileModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+    AppLogger.d(_tag, 'fetchFavorites: ${list.length} items');
+    return list;
+  }
 
-    final controller = StreamController<List<ProfileModel>>.broadcast();
-
-    Future<void> fetchAndEmit() async {
-      try {
-        final response = await _api.dio.get('/users/$userId/favorites');
-        final list = (response.data as List)
-            .map((e) => ProfileModel.fromJson(e as Map<String, dynamic>))
-            .toList();
-        AppLogger.d(_tag, 'watchFavorites: ${list.length} favorites');
-        if (!controller.isClosed) controller.add(list);
-      } catch (e) {
-        AppLogger.e(_tag, 'watchFavorites fetch failed', e);
-        if (!controller.isClosed) controller.addError(e);
-      }
-    }
-
-    fetchAndEmit();
-    return controller.stream;
+  @override
+  Stream<List<ProfileModel>> watchFavorites(String userId) async* {
+    yield await fetchFavorites(userId);
   }
 
   @override

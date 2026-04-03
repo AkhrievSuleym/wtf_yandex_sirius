@@ -1,6 +1,8 @@
 import '../../profile/models/profile_model.dart';
 
 abstract class FavoritesRepository {
+  Future<List<ProfileModel>> fetchFavorites(String userId);
+
   Stream<List<ProfileModel>> watchFavorites(String userId);
   Future<void> addToFavorites({
     required String userId,

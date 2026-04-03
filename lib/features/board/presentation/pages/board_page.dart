@@ -41,7 +41,7 @@ class _BoardPageState extends State<BoardPage> {
 
   void _share(String username) {
     Share.share(
-      'Напиши мне анонимно: wtf://u/$username',
+      'Напиши мне анонимно: wtf:///u/$username',
       subject: 'Мой профиль WTF',
     );
   }

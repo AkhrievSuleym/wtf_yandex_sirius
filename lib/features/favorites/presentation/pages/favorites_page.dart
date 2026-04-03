@@ -32,9 +32,17 @@ class _FavoritesPageState extends State<FavoritesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Избранное')),
-      body: BlocBuilder<FavoritesCubit, FavoritesState>(
-        builder: (context, state) {
-          return switch (state) {
+      body: BlocListener<AuthCubit, AuthState>(
+        listenWhen: (prev, curr) =>
+            curr is AuthAuthenticated && prev is! AuthAuthenticated,
+        listener: (context, state) {
+          if (state is AuthAuthenticated) {
+            context.read<FavoritesCubit>().subscribeFavorites(state.user.uid);
+          }
+        },
+        child: BlocBuilder<FavoritesCubit, FavoritesState>(
+          builder: (context, state) {
+            return switch (state) {
             FavoritesInitial() || FavoritesLoading() => const FavoritesShimmer(),
             FavoritesError(:final message) => AppErrorWidget(
                 message: message,
@@ -71,8 +79,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
                           .slideX(begin: 0.05, end: 0, duration: 200.ms);
                     },
                   ),
-          };
-        },
+            };
+          },
+        ),
       ),
     );
   }

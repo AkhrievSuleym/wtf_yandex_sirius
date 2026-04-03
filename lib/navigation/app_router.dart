@@ -32,6 +32,16 @@ GoRouter createRouter(AuthCubit authCubit) {
     initialLocation: '/board',
     refreshListenable: _AuthStateListenable(authCubit),
     redirect: (context, state) {
+      final uri = state.uri;
+      if (uri.scheme == 'wtf') {
+        if (uri.host == 'u' && uri.pathSegments.isNotEmpty) {
+          return '/u/${Uri.encodeComponent(uri.pathSegments.first)}';
+        }
+        if (uri.path.startsWith('/u/') && uri.path.length > 3) {
+          return uri.path;
+        }
+      }
+
       final authState = authCubit.state;
       final path = state.uri.path;
 
@@ -106,8 +116,10 @@ GoRouter createRouter(AuthCubit authCubit) {
         },
       ),
       StatefulShellRoute.indexedStack(
-        builder: (_, __, navigationShell) =>
-            ScaffoldWithBottomNav(navigationShell: navigationShell),
+        builder: (_, __, navigationShell) => BlocProvider.value(
+          value: getIt<FavoritesCubit>(),
+          child: ScaffoldWithBottomNav(navigationShell: navigationShell),
+        ),
         branches: [
           // Tab 0 — Board
           StatefulShellBranch(
@@ -140,10 +152,6 @@ GoRouter createRouter(AuthCubit authCubit) {
                       providers: [
                         BlocProvider(create: (_) => getIt<ProfileCubit>()),
                         BlocProvider(create: (_) => getIt<BoardCubit>()),
-                        BlocProvider(create: (_) => getIt<FavoritesCubit>()
-                          ..subscribeFavorites(
-                            (authCubit.state as AuthAuthenticated?)?.user.uid ?? '',
-                          )),
                       ],
                       child: PublicProfilePage(
                         uid: state.pathParameters['uid']!,
@@ -172,10 +180,7 @@ GoRouter createRouter(AuthCubit authCubit) {
               GoRoute(
                 path: '/favorites',
                 name: RouteNames.favorites,
-                builder: (_, __) => BlocProvider(
-                  create: (_) => getIt<FavoritesCubit>(),
-                  child: const FavoritesPage(),
-                ),
+                builder: (_, __) => const FavoritesPage(),
                 routes: [
                   GoRoute(
                     path: ':uid',
@@ -183,10 +188,6 @@ GoRouter createRouter(AuthCubit authCubit) {
                       providers: [
                         BlocProvider(create: (_) => getIt<ProfileCubit>()),
                         BlocProvider(create: (_) => getIt<BoardCubit>()),
-                        BlocProvider(create: (_) => getIt<FavoritesCubit>()
-                          ..subscribeFavorites(
-                            (authCubit.state as AuthAuthenticated?)?.user.uid ?? '',
-                          )),
                       ],
                       child: PublicProfilePage(
                         uid: state.pathParameters['uid']!,
