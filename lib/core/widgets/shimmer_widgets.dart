@@ -62,13 +62,13 @@ class CommentCardShimmer extends StatelessWidget {
             ShimmerBox(width: 160, height: 14),
             const SizedBox(height: 12),
             Row(
-              children: [
-                ShimmerBox(width: 52, height: 28, borderRadius: 20),
-                const SizedBox(width: 8),
-                ShimmerBox(width: 52, height: 28, borderRadius: 20),
-                const SizedBox(width: 8),
-                ShimmerBox(width: 52, height: 28, borderRadius: 20),
-              ],
+              children: List.generate(
+                5,
+                (i) => Padding(
+                  padding: EdgeInsets.only(right: i < 4 ? 6 : 0),
+                  child: const ShimmerBox(width: 48, height: 28, borderRadius: 20),
+                ),
+              ),
             ),
           ],
         ),
@@ -185,16 +185,28 @@ class ProfileHeaderShimmer extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const ShimmerBox(width: 88, height: 88, borderRadius: 44),
+          const Center(child: ShimmerBox(width: 88, height: 88, borderRadius: 44)),
           const SizedBox(height: 16),
-          const ShimmerBox(width: 140, height: 20),
+          const Center(child: ShimmerBox(width: 140, height: 20)),
           const SizedBox(height: 8),
-          const ShimmerBox(width: 100, height: 16),
+          const Center(child: ShimmerBox(width: 100, height: 16)),
           const SizedBox(height: 10),
-          const ShimmerBox(width: 200, height: 14),
+          const Center(child: ShimmerBox(width: 200, height: 14)),
           const SizedBox(height: 6),
-          const ShimmerBox(width: 160, height: 14),
+          const Center(child: ShimmerBox(width: 160, height: 14)),
+          const SizedBox(height: 20),
+          const ShimmerBox(width: 120, height: 14, borderRadius: 6),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: List.generate(
+              5,
+              (_) => const ShimmerBox(width: 56, height: 36, borderRadius: 16),
+            ),
+          ),
         ],
       ),
     );

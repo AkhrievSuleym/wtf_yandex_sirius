@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class UserModel {
   final String uid;
   final String username;
@@ -10,7 +8,6 @@ class UserModel {
   final DateTime createdAt;
   final DateTime updatedAt;
   final int commentCount;
-  final String? fcmToken;
 
   const UserModel({
     required this.uid,
@@ -22,8 +19,21 @@ class UserModel {
     required this.createdAt,
     required this.updatedAt,
     required this.commentCount,
-    this.fcmToken,
   });
+
+  factory UserModel.empty({required String uid}) {
+    final now = DateTime.now();
+    return UserModel(
+      uid: uid,
+      username: '',
+      displayName: '',
+      bio: '',
+      isPublic: true,
+      createdAt: now,
+      updatedAt: now,
+      commentCount: 0,
+    );
+  }
 
   UserModel copyWith({
     String? uid,
@@ -35,7 +45,6 @@ class UserModel {
     DateTime? createdAt,
     DateTime? updatedAt,
     int? commentCount,
-    String? fcmToken,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -47,42 +56,20 @@ class UserModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       commentCount: commentCount ?? this.commentCount,
-      fcmToken: fcmToken ?? this.fcmToken,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'uid': uid,
-      'username': username,
-      'displayName': displayName,
-      'bio': bio,
-      'avatarUrl': avatarUrl,
-      'isPublic': isPublic,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
-      'commentCount': commentCount,
-      'fcmToken': fcmToken,
-    };
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       uid: json['uid'] as String,
-      username: json['username'] as String,
-      displayName: json['displayName'] as String,
+      username: json['username'] as String? ?? '',
+      displayName: json['displayName'] as String? ?? '',
       bio: json['bio'] as String? ?? '',
       avatarUrl: json['avatarUrl'] as String?,
       isPublic: json['isPublic'] as bool? ?? true,
-      createdAt: (json['createdAt'] as Timestamp).toDate(),
-      updatedAt: (json['updatedAt'] as Timestamp).toDate(),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
       commentCount: json['commentCount'] as int? ?? 0,
-      fcmToken: json['fcmToken'] as String?,
     );
-  }
-
-  factory UserModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return UserModel.fromJson(data);
   }
 }

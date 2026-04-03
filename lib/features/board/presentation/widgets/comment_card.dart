@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../models/comment_model.dart';
@@ -22,6 +23,19 @@ class CommentCard extends StatelessWidget {
     this.onTap,
   });
 
+  void _openDetail(BuildContext context) {
+    context.push(
+      '/comments/${comment.id}',
+      extra: {
+        'text': comment.text,
+        'createdAt': comment.createdAt,
+        'boardOwnerUid': comment.boardOwnerId,
+        'isOwner': isOwner,
+      },
+    );
+    onTap?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -29,31 +43,34 @@ class CommentCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        onTap: () => _openDetail(context),
+        borderRadius: BorderRadius.circular(18),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header row
               Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
+                      horizontal: 10,
+                      vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      color: AppColors.memeYellow.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: AppColors.ink.withValues(alpha: 0.18),
+                        width: 1.25,
+                      ),
                     ),
                     child: const Text(
                       'Анонимно',
                       style: TextStyle(
                         fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.ink,
                       ),
                     ),
                   ),
@@ -66,15 +83,19 @@ class CommentCard extends StatelessWidget {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.unreadBadge,
-                        borderRadius: BorderRadius.circular(8),
+                        color: AppColors.memePeach.withValues(alpha: 0.95),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: AppColors.memeOrange.withValues(alpha: 0.45),
+                          width: 1.25,
+                        ),
                       ),
                       child: const Text(
                         'Новое',
                         style: TextStyle(
                           fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.ink,
                         ),
                       ),
                     ),
@@ -89,17 +110,39 @@ class CommentCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              // Text
               Text(
                 comment.text,
                 style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: 12),
-              // Reactions
-              ReactionBar(
-                comment: comment,
-                currentUserId: currentUserId,
-                onToggle: onToggleReaction,
+              Row(
+                children: [
+                  Expanded(
+                    child: ReactionBar(
+                      comment: comment,
+                      currentUserId: currentUserId,
+                      onToggle: onToggleReaction,
+                    ),
+                  ),
+                  if (comment.replyCount > 0)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.chat_bubble_outline,
+                          size: 14,
+                          color: AppColors.secondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${comment.replyCount}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSecondaryLight,
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
               ),
             ],
           ),

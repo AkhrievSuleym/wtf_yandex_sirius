@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import '../../../core/constants/firestore_collections.dart';
+
+import 'package:dio/dio.dart';
+
+import '../../../core/services/api_client.dart';
 import '../../../core/utils/app_logger.dart';
 import '../models/profile_model.dart';
 import 'profile_repository.dart';
@@ -10,80 +10,75 @@ import 'profile_repository.dart';
 class ProfileRepositoryImpl implements ProfileRepository {
   static const _tag = 'ProfileRepository';
 
-  final FirebaseFirestore _firestore;
-  final FirebaseAuth _auth;
-  final FirebaseStorage _storage;
+  final ApiClient _api;
 
-  ProfileRepositoryImpl({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-    FirebaseStorage? storage,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance,
-        _storage = storage ?? FirebaseStorage.instance;
+  // Bumped on every avatar upload to force cache invalidation.
+  String? _avatarCacheBuster;
+
+  ProfileRepositoryImpl(this._api);
+
+  String _resolveAvatarUrl(String relative) {
+    final base = _api.dio.options.baseUrl.replaceAll(RegExp(r'/$'), '');
+    final full = relative.startsWith('http') ? relative : '$base$relative';
+    return _avatarCacheBuster != null ? '$full?v=$_avatarCacheBuster' : full;
+  }
+
+  ProfileModel _toModel(Map<String, dynamic> json) {
+    final rawAvatar = json['avatarUrl'] as String?;
+    final copy = Map<String, dynamic>.from(json);
+    if (rawAvatar != null) {
+      copy['avatarUrl'] = _resolveAvatarUrl(rawAvatar);
+    }
+    return ProfileModel.fromJson(copy);
+  }
 
   @override
   Future<ProfileModel> getProfile(String uid) async {
     AppLogger.d(_tag, 'getProfile: uid=$uid');
-    final doc = await _firestore
-        .collection(FirestoreCollections.users)
-        .doc(uid)
-        .get();
-    if (!doc.exists) {
-      AppLogger.w(_tag, 'getProfile: not found uid=$uid');
-      throw Exception('Профиль не найден');
-    }
-    return ProfileModel.fromFirestore(doc);
+    final response = await _api.dio.get('/users/$uid');
+    return _toModel(response.data as Map<String, dynamic>);
   }
 
   @override
   Future<void> updateProfile({
     String? displayName,
-    String? bio,
     bool? isPublic,
+    String? bio,
     String? avatarPath,
   }) async {
-    final uid = _auth.currentUser?.uid;
+    final uid = _api.currentUid;
     if (uid == null) throw Exception('Пользователь не авторизован');
     AppLogger.i(_tag, 'updateProfile: uid=$uid');
 
-    final updates = <String, dynamic>{'updatedAt': Timestamp.now()};
-    if (displayName != null) updates['displayName'] = displayName.trim();
-    if (bio != null) updates['bio'] = bio.trim();
-    if (isPublic != null) updates['isPublic'] = isPublic;
-
     if (avatarPath != null) {
       AppLogger.d(_tag, 'updateProfile: uploading avatar');
-      final url = await _uploadAvatar(uid, avatarPath);
-      updates['avatarUrl'] = url;
-      AppLogger.d(_tag, 'updateProfile: avatar uploaded url=$url');
+      final form = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          avatarPath,
+          filename: File(avatarPath).uri.pathSegments.last,
+        ),
+      });
+      await _api.dio.post('/users/$uid/avatar', data: form);
+      // Bump version so CachedNetworkImage fetches the new file.
+      _avatarCacheBuster = '${DateTime.now().millisecondsSinceEpoch}';
+      AppLogger.d(_tag, 'updateProfile: avatar buster=$_avatarCacheBuster');
     }
 
-    await _firestore
-        .collection(FirestoreCollections.users)
-        .doc(uid)
-        .update(updates);
+    if (displayName != null || bio != null || isPublic != null) {
+      await _api.dio.put('/users/$uid', data: {
+        if (displayName != null) 'displayName': displayName.trim(),
+        if (bio != null) 'bio': bio.trim(),
+        if (isPublic != null) 'isPublic': isPublic,
+      });
+    }
+
     AppLogger.i(_tag, 'updateProfile: done');
   }
 
   @override
   Future<bool> isUsernameAvailable(String username) async {
     AppLogger.d(_tag, 'isUsernameAvailable: $username');
-    final doc = await _firestore
-        .collection(FirestoreCollections.usernames)
-        .doc(username.toLowerCase())
-        .get();
-    return !doc.exists;
-  }
-
-  Future<String> _uploadAvatar(String uid, String localPath) async {
-    final file = File(localPath);
-    final ext = localPath.split('.').last;
-    final ref = _storage.ref('avatars/$uid/avatar.$ext');
-    final task = await ref.putFile(
-      file,
-      SettableMetadata(contentType: 'image/$ext'),
-    );
-    return task.ref.getDownloadURL();
+    final response = await _api.dio.get('/users/check/$username');
+    return response.data['available'] as bool;
   }
 }

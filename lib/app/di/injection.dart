@@ -1,9 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/services/api_client.dart';
 import '../../features/auth/presentation/cubits/auth_cubit.dart';
 import '../../features/auth/repositories/auth_repository.dart';
 import '../../features/auth/repositories/auth_repository_impl.dart';
@@ -26,58 +24,33 @@ import '../../features/search/repositories/search_repository_impl.dart';
 final getIt = GetIt.instance;
 
 Future<void> setupDependencies() async {
-  // External
-  getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
-  getIt.registerLazySingleton<FirebaseFirestore>(() {
-    final firestore = FirebaseFirestore.instance;
-    // Enable offline persistence with 100 MB cache
-    firestore.settings = const Settings(
-      persistenceEnabled: true,
-      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
-    );
-    return firestore;
-  });
-  getIt.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
-
   final prefs = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(prefs);
 
+  // Core
+  getIt.registerLazySingleton<ApiClient>(() => ApiClient(prefs));
+
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(
-      auth: getIt<FirebaseAuth>(),
-      firestore: getIt<FirebaseFirestore>(),
-    ),
+    () => AuthRepositoryImpl(getIt<ApiClient>()),
   );
-
   getIt.registerLazySingleton<BoardRepository>(
-    () => BoardRepositoryImpl(firestore: getIt<FirebaseFirestore>()),
+    () => BoardRepositoryImpl(getIt<ApiClient>()),
   );
-
   getIt.registerLazySingleton<CommentRepository>(
-    () => CommentRepositoryImpl(
-      firestore: getIt<FirebaseFirestore>(),
-      auth: getIt<FirebaseAuth>(),
-    ),
+    () => CommentRepositoryImpl(getIt<ApiClient>()),
   );
-
   getIt.registerLazySingleton<ProfileRepository>(
-    () => ProfileRepositoryImpl(
-      firestore: getIt<FirebaseFirestore>(),
-      auth: getIt<FirebaseAuth>(),
-      storage: getIt<FirebaseStorage>(),
-    ),
+    () => ProfileRepositoryImpl(getIt<ApiClient>()),
   );
-
   getIt.registerLazySingleton<SearchRepository>(
     () => SearchRepositoryImpl(
-      firestore: getIt<FirebaseFirestore>(),
+      api: getIt<ApiClient>(),
       prefs: getIt<SharedPreferences>(),
     ),
   );
-
   getIt.registerLazySingleton<FavoritesRepository>(
-    () => FavoritesRepositoryImpl(firestore: getIt<FirebaseFirestore>()),
+    () => FavoritesRepositoryImpl(getIt<ApiClient>()),
   );
 
   // Cubits (factory — новый экземпляр на каждый вызов)

@@ -13,6 +13,7 @@ class AppTextField extends StatelessWidget {
   final Widget? suffix;
   final Widget? prefix;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onFieldSubmitted;
   final bool enabled;
 
   const AppTextField({
@@ -29,6 +30,7 @@ class AppTextField extends StatelessWidget {
     this.suffix,
     this.prefix,
     this.onChanged,
+    this.onFieldSubmitted,
     this.enabled = true,
   });
 
@@ -43,6 +45,7 @@ class AppTextField extends StatelessWidget {
       maxLength: maxLength,
       maxLines: maxLines,
       onChanged: onChanged,
+      onFieldSubmitted: onFieldSubmitted,
       enabled: enabled,
       decoration: InputDecoration(
         labelText: label,

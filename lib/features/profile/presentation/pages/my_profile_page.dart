@@ -72,6 +72,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
             ProfileLoaded(:final profile) ||
             ProfileUpdating(:final profile) =>
               SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
                 child: Column(
                   children: [
                     ProfileHeader(

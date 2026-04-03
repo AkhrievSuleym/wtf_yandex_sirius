@@ -1,36 +1,38 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../core/constants/firestore_collections.dart';
+import 'dart:async';
+
+import '../../../core/services/api_client.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../profile/models/profile_model.dart';
 import 'favorites_repository.dart';
 
 class FavoritesRepositoryImpl implements FavoritesRepository {
-  final FirebaseFirestore _firestore;
+  static const _tag = 'FavoritesRepository';
 
-  FavoritesRepositoryImpl({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
-
-  CollectionReference _favRef(String userId) => _firestore
-      .collection(FirestoreCollections.users)
-      .doc(userId)
-      .collection(FirestoreCollections.favorites);
+  final ApiClient _api;
+  FavoritesRepositoryImpl(this._api);
 
   @override
   Stream<List<ProfileModel>> watchFavorites(String userId) {
-    return _favRef(userId)
-        .orderBy('addedAt', descending: true)
-        .snapshots()
-        .map((snap) => snap.docs.map((doc) {
-              final data = doc.data() as Map<String, dynamic>;
-              return ProfileModel(
-                uid: data['favoriteUid'] as String,
-                username: data['username'] as String,
-                displayName: data['displayName'] as String,
-                bio: '',
-                avatarUrl: data['avatarUrl'] as String?,
-                commentCount: 0,
-                isPublic: true,
-              );
-            }).toList());
+    AppLogger.d(_tag, 'watchFavorites: userId=$userId');
+
+    final controller = StreamController<List<ProfileModel>>.broadcast();
+
+    Future<void> fetchAndEmit() async {
+      try {
+        final response = await _api.dio.get('/users/$userId/favorites');
+        final list = (response.data as List)
+            .map((e) => ProfileModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+        AppLogger.d(_tag, 'watchFavorites: ${list.length} favorites');
+        if (!controller.isClosed) controller.add(list);
+      } catch (e) {
+        AppLogger.e(_tag, 'watchFavorites fetch failed', e);
+        if (!controller.isClosed) controller.addError(e);
+      }
+    }
+
+    fetchAndEmit();
+    return controller.stream;
   }
 
   @override
@@ -38,13 +40,11 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
     required String userId,
     required ProfileModel profile,
   }) async {
-    await _favRef(userId).doc(profile.uid).set({
-      'favoriteUid': profile.uid,
-      'username': profile.username,
-      'displayName': profile.displayName,
-      'avatarUrl': profile.avatarUrl,
-      'addedAt': Timestamp.now(),
-    });
+    AppLogger.i(_tag, 'addToFavorites: @${profile.username}');
+    await _api.dio.post(
+      '/users/$userId/favorites',
+      data: {'favoriteUid': profile.uid},
+    );
   }
 
   @override
@@ -52,7 +52,8 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
     required String userId,
     required String favoriteUid,
   }) async {
-    await _favRef(userId).doc(favoriteUid).delete();
+    AppLogger.i(_tag, 'removeFromFavorites: uid=$favoriteUid');
+    await _api.dio.delete('/users/$userId/favorites/$favoriteUid');
   }
 
   @override
@@ -60,7 +61,9 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
     required String userId,
     required String targetUid,
   }) async {
-    final doc = await _favRef(userId).doc(targetUid).get();
-    return doc.exists;
+    AppLogger.d(_tag, 'isFavorite: target=$targetUid');
+    final response = await _api.dio
+        .get('/users/$userId/favorites/$targetUid/check');
+    return response.data['isFavorite'] as bool;
   }
 }

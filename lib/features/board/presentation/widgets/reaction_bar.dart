@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../board/models/comment_model.dart';
+import '../../models/comment_model.dart';
 import '../../../../app/theme/app_colors.dart';
 
 class ReactionBar extends StatelessWidget {
@@ -22,8 +22,9 @@ class ReactionBar extends StatelessWidget {
         final isActive = comment.hasReacted(key, currentUserId);
 
         return Padding(
-          padding: const EdgeInsets.only(right: 8),
+          padding: const EdgeInsets.only(right: 6),
           child: _ReactionChip(
+            reactionKey: key,
             emoji: CommentModel.emojiFor(key),
             count: count,
             isActive: isActive,
@@ -35,13 +36,15 @@ class ReactionBar extends StatelessWidget {
   }
 }
 
-class _ReactionChip extends StatelessWidget {
+class _ReactionChip extends StatefulWidget {
+  final String reactionKey;
   final String emoji;
   final int count;
   final bool isActive;
   final VoidCallback onTap;
 
   const _ReactionChip({
+    required this.reactionKey,
     required this.emoji,
     required this.count,
     required this.isActive,
@@ -49,38 +52,125 @@ class _ReactionChip extends StatelessWidget {
   });
 
   @override
+  State<_ReactionChip> createState() => _ReactionChipState();
+}
+
+class _ReactionChipState extends State<_ReactionChip>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _popCtrl;
+
+  static final Animatable<double> _emojiScale = TweenSequence<double>([
+    TweenSequenceItem(
+      tween: Tween(begin: 1.0, end: 1.38)
+          .chain(CurveTween(curve: Curves.easeOutCubic)),
+      weight: 32,
+    ),
+    TweenSequenceItem(
+      tween: Tween(begin: 1.38, end: 0.94)
+          .chain(CurveTween(curve: Curves.easeInCubic)),
+      weight: 22,
+    ),
+    TweenSequenceItem(
+      tween: Tween(begin: 0.94, end: 1.0)
+          .chain(CurveTween(curve: Curves.elasticOut)),
+      weight: 46,
+    ),
+  ]);
+
+  @override
+  void initState() {
+    super.initState();
+    _popCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 520),
+    );
+  }
+
+  @override
+  void dispose() {
+    _popCtrl.dispose();
+    super.dispose();
+  }
+
+  void _handleTap() {
+    _popCtrl.forward(from: 0);
+    widget.onTap();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: isActive
-              ? AppColors.primary.withValues(alpha: 0.12)
-              : Colors.transparent,
-          border: Border.all(
-            color: isActive ? AppColors.primary : AppColors.divider,
-            width: 1.5,
+    final surface = Theme.of(context).colorScheme.surface;
+    final tint = AppColors.reactionTintForKey(widget.reactionKey);
+    final scaleAnim = _emojiScale.animate(_popCtrl);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _handleTap,
+        borderRadius: BorderRadius.circular(22),
+        splashColor: tint.withValues(alpha: 0.25),
+        highlightColor: tint.withValues(alpha: 0.08),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 240),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: widget.isActive
+                ? tint.withValues(alpha: 0.2)
+                : surface,
+            border: Border.all(
+              color: widget.isActive
+                  ? tint.withValues(alpha: 0.65)
+                  : AppColors.ink.withValues(alpha: 0.1),
+              width: widget.isActive ? 2 : 1.25,
+            ),
+            borderRadius: BorderRadius.circular(22),
           ),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 14)),
-            if (count > 0) ...[
-              const SizedBox(width: 4),
-              Text(
-                '$count',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: isActive ? AppColors.primary : null,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedBuilder(
+                animation: _popCtrl,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: scaleAnim.value,
+                    child: child,
+                  );
+                },
+                child: Text(
+                  widget.emoji,
+                  style: const TextStyle(fontSize: 16),
                 ),
               ),
+              if (widget.count > 0) ...[
+                const SizedBox(width: 5),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 220),
+                  switchInCurve: Curves.easeOutBack,
+                  switchOutCurve: Curves.easeIn,
+                  transitionBuilder: (child, anim) {
+                    return ScaleTransition(
+                      scale: Tween<double>(begin: 0.6, end: 1).animate(anim),
+                      child: FadeTransition(opacity: anim, child: child),
+                    );
+                  },
+                  child: Text(
+                    '${widget.count}',
+                    key: ValueKey(widget.count),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: widget.isActive
+                          ? tint
+                          : Theme.of(context).brightness == Brightness.dark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                    ),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

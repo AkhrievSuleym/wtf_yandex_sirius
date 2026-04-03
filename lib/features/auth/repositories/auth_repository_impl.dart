@@ -1,161 +1,144 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../../../core/constants/firestore_collections.dart';
+import 'package:dio/dio.dart';
+import '../../../core/services/api_client.dart';
 import '../../../core/utils/app_logger.dart';
 import '../models/user_model.dart';
 import 'auth_repository.dart';
 
-String _mapFirebaseAuthError(FirebaseAuthException e) {
-  switch (e.code) {
-    case 'admin-restricted-operation':
-      return 'Анонимный вход отключён. Обратитесь к администратору.';
-    case 'network-request-failed':
-      return 'Нет подключения к интернету.';
-    case 'too-many-requests':
-      return 'Слишком много попыток. Попробуйте позже.';
-    default:
-      return 'Ошибка входа. Попробуйте ещё раз.';
-  }
-}
-
-bool _isTransient(Object e) {
-  if (e is FirebaseException) {
-    return e.code == 'unavailable' ||
-        e.code == 'deadline-exceeded' ||
-        e.code == 'resource-exhausted';
-  }
-  return false;
-}
-
 class AuthRepositoryImpl implements AuthRepository {
   static const _tag = 'AuthRepository';
 
-  final FirebaseAuth _auth;
-  final FirebaseFirestore _firestore;
+  final ApiClient _api;
 
-  AuthRepositoryImpl({
-    FirebaseAuth? auth,
-    FirebaseFirestore? firestore,
-  })  : _auth = auth ?? FirebaseAuth.instance,
-        _firestore = firestore ?? FirebaseFirestore.instance;
+  AuthRepositoryImpl(this._api);
 
   @override
-  Stream<UserModel?> authStateChanges() {
-    AppLogger.d(_tag, 'Subscribing to authStateChanges');
-    return _auth.authStateChanges().asyncMap((firebaseUser) async {
-      if (firebaseUser == null) {
-        AppLogger.i(_tag, 'Auth state: unauthenticated');
-        return null;
-      }
-      AppLogger.i(_tag, 'Auth state: authenticated uid=${firebaseUser.uid}');
-
-      // Retry up to 3 times for transient Firestore errors
-      return _fetchUserModelWithRetry(firebaseUser.uid);
-    });
+  Stream<UserModel?> authStateChanges() async* {
+    AppLogger.d(_tag, 'authStateChanges: reading stored credentials');
+    yield await getCurrentUser();
   }
 
   @override
   Future<UserModel?> getCurrentUser() async {
-    final firebaseUser = _auth.currentUser;
-    if (firebaseUser == null) {
-      AppLogger.d(_tag, 'getCurrentUser: no current user');
+    final uid = _api.currentUid;
+    if (uid == null) {
+      AppLogger.d(_tag, 'getCurrentUser: no stored uid');
       return null;
     }
-    AppLogger.d(_tag, 'getCurrentUser: uid=${firebaseUser.uid}');
-    return _fetchUserModelWithRetry(firebaseUser.uid);
+    AppLogger.d(_tag, 'getCurrentUser: uid=$uid');
+    try {
+      final response = await _api.dio.get('/users/$uid');
+      return UserModel.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        AppLogger.w(_tag, 'getCurrentUser: user not found, clearing credentials');
+        await _api.clearCredentials();
+        return null;
+      }
+      AppLogger.e(_tag, 'getCurrentUser failed', e);
+      rethrow;
+    }
   }
 
   @override
   Future<UserModel> signUpAnonymous() async {
     AppLogger.i(_tag, 'signUpAnonymous: starting');
-    final UserCredential credential;
     try {
-      credential = await _auth.signInAnonymously();
-    } on FirebaseAuthException catch (e) {
-      AppLogger.e(_tag, 'signUpAnonymous failed: ${e.code}', e);
-      throw Exception(_mapFirebaseAuthError(e));
+      final response = await _api.dio.post('/auth/anonymous');
+      final uid = response.data['uid'] as String;
+      final token = response.data['token'] as String;
+      await _api.saveCredentials(uid, token);
+      AppLogger.i(_tag, 'signUpAnonymous: success uid=$uid');
+      return UserModel.empty(uid: uid);
+    } on DioException catch (e) {
+      AppLogger.e(_tag, 'signUpAnonymous failed', e);
+      throw Exception('Ошибка входа. Попробуйте ещё раз.');
     }
-    final uid = credential.user!.uid;
-    AppLogger.i(_tag, 'signUpAnonymous: success uid=$uid');
+  }
 
-    final doc = await _firestore
-        .collection(FirestoreCollections.users)
-        .doc(uid)
-        .get();
-
-    if (doc.exists) {
-      AppLogger.d(_tag, 'signUpAnonymous: existing profile found');
-      return UserModel.fromFirestore(doc);
+  @override
+  Future<UserModel> loginWithPassword({
+    required String username,
+    required String password,
+  }) async {
+    AppLogger.i(_tag, 'loginWithPassword: username=$username');
+    try {
+      final response = await _api.dio.post('/auth/login', data: {
+        'username': username.toLowerCase().trim(),
+        'password': password,
+      });
+      final uid = response.data['uid'] as String;
+      final token = response.data['token'] as String;
+      await _api.saveCredentials(uid, token);
+      AppLogger.i(_tag, 'loginWithPassword: success uid=$uid');
+      final user = await getCurrentUser();
+      return user!;
+    } on DioException catch (e) {
+      AppLogger.e(_tag, 'loginWithPassword failed', e);
+      final msg = e.response?.data?.toString() ?? 'Ошибка входа';
+      throw Exception(msg);
     }
+  }
 
-    AppLogger.d(_tag, 'signUpAnonymous: new user, profile not yet created');
-    final now = DateTime.now();
-    return UserModel(
-      uid: uid,
-      username: '',
-      displayName: '',
-      bio: '',
-      isPublic: true,
-      createdAt: now,
-      updatedAt: now,
-      commentCount: 0,
-    );
+  @override
+  Future<void> createProfile({
+    required String username,
+    required String displayName,
+    required String bio,
+  }) async {
+    AppLogger.i(_tag, 'createProfile: username=$username');
+    try {
+      await _api.dio.post('/users', data: {
+        'username': username.toLowerCase().trim(),
+        'displayName': displayName.trim(),
+        'bio': bio.trim(),
+      });
+      AppLogger.i(_tag, 'createProfile: done');
+    } on DioException catch (e) {
+      AppLogger.e(_tag, 'createProfile failed', e);
+      if (e.response?.statusCode == 409) {
+        throw Exception('Этот никнейм уже занят');
+      }
+      throw Exception('Ошибка создания профиля. Попробуйте ещё раз.');
+    }
+  }
+
+  @override
+  Future<void> setPassword(String password) async {
+    AppLogger.i(_tag, 'setPassword');
+    try {
+      await _api.dio.put('/auth/password', data: {'password': password});
+    } on DioException catch (e) {
+      AppLogger.e(_tag, 'setPassword failed', e);
+      final msg = e.response?.data?.toString() ?? 'Ошибка установки пароля';
+      throw Exception(msg);
+    }
+  }
+
+  @override
+  Future<bool> isUsernameAvailable(String username) async {
+    AppLogger.d(_tag, 'isUsernameAvailable: $username');
+    try {
+      final response = await _api.dio.get('/users/check/$username');
+      return response.data['available'] as bool;
+    } on DioException catch (e) {
+      AppLogger.e(_tag, 'isUsernameAvailable failed', e);
+      return false;
+    }
   }
 
   @override
   Future<void> signOut() async {
-    AppLogger.i(_tag, 'signOut: uid=${_auth.currentUser?.uid}');
-    await _auth.signOut();
+    AppLogger.i(_tag, 'signOut');
+    await _api.clearCredentials();
   }
 
   @override
   Future<void> deleteAccount() async {
-    final uid = _auth.currentUser?.uid;
+    final uid = _api.currentUid;
     AppLogger.w(_tag, 'deleteAccount: uid=$uid');
     if (uid == null) return;
-
-    final batch = _firestore.batch();
-    batch.delete(_firestore.collection(FirestoreCollections.users).doc(uid));
-    await batch.commit();
-    await _auth.currentUser?.delete();
+    await _api.dio.delete('/users/$uid');
+    await _api.clearCredentials();
     AppLogger.i(_tag, 'deleteAccount: done');
-  }
-
-  /// Fetches user model with up to [maxAttempts] retries on transient errors.
-  Future<UserModel?> _fetchUserModelWithRetry(
-    String uid, {
-    int maxAttempts = 3,
-  }) async {
-    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        return await _fetchUserModel(uid);
-      } catch (e) {
-        if (_isTransient(e) && attempt < maxAttempts) {
-          final delay = Duration(milliseconds: 500 * attempt);
-          AppLogger.w(
-            _tag,
-            '_fetchUserModel transient error (attempt $attempt/$maxAttempts), retry in ${delay.inMilliseconds}ms',
-          );
-          await Future.delayed(delay);
-        } else {
-          AppLogger.e(_tag, '_fetchUserModel failed after $attempt attempt(s)', e);
-          rethrow;
-        }
-      }
-    }
-    return null;
-  }
-
-  Future<UserModel?> _fetchUserModel(String uid) async {
-    AppLogger.d(_tag, '_fetchUserModel: uid=$uid');
-    final doc = await _firestore
-        .collection(FirestoreCollections.users)
-        .doc(uid)
-        .get();
-    if (!doc.exists) {
-      AppLogger.w(_tag, '_fetchUserModel: document not found uid=$uid');
-      return null;
-    }
-    return UserModel.fromFirestore(doc);
   }
 }

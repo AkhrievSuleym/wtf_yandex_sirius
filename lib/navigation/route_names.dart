@@ -5,6 +5,7 @@ class RouteNames {
   static const String welcome = 'welcome';
   static const String signUp = 'sign-up';
   static const String createProfile = 'create-profile';
+  static const String login = 'login';
 
   // Tabs (ShellRoute)
   static const String board = 'board';
@@ -19,6 +20,8 @@ class RouteNames {
   static const String publicProfile = 'public-profile';
   static const String sendComment = 'send-comment';
   static const String settings = 'settings';
+  static const String changePassword = 'change-password';
+  static const String commentDetail = 'comment-detail';
 }
 
 class RoutePaths {
@@ -32,6 +35,8 @@ class RoutePaths {
   static const String favorites = '/favorites';
   static const String profile = '/profile';
   static const String settings = '/profile/settings';
+  static const String changePassword = '/profile/settings/change-password';
+  static String commentDetail(String id) => '/comments/$id';
 
   static String publicProfileFromSearch(String uid) => '/search/$uid';
   static String sendCommentFromSearch(String uid) => '/search/$uid/comment';

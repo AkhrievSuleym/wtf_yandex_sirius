@@ -77,6 +77,35 @@ class MockAuthRepository extends _i1.Mock implements _i3.AuthRepository {
       ) as _i4.Future<_i2.UserModel>);
 
   @override
+  _i4.Future<void> createProfile({
+    required String? username,
+    required String? displayName,
+    required String? bio,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #createProfile,
+          [],
+          {
+            #username: username,
+            #displayName: displayName,
+            #bio: bio,
+          },
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<bool> isUsernameAvailable(String? username) => (super.noSuchMethod(
+        Invocation.method(
+          #isUsernameAvailable,
+          [username],
+        ),
+        returnValue: _i4.Future<bool>.value(false),
+      ) as _i4.Future<bool>);
+
+  @override
   _i4.Future<void> signOut() => (super.noSuchMethod(
         Invocation.method(
           #signOut,

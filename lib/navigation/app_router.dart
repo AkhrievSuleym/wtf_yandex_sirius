@@ -5,11 +5,14 @@ import 'package:go_router/go_router.dart';
 import '../app/di/injection.dart';
 import '../features/auth/presentation/cubits/auth_cubit.dart';
 import '../features/auth/presentation/cubits/auth_state.dart';
+import '../features/auth/presentation/pages/change_password_page.dart';
 import '../features/auth/presentation/pages/create_profile_page.dart';
+import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/sign_up_page.dart';
 import '../features/auth/presentation/pages/welcome_page.dart';
 import '../features/board/presentation/cubits/board_cubit.dart';
 import '../features/board/presentation/pages/board_page.dart';
+import '../features/board/presentation/pages/comment_detail_page.dart';
 import '../features/comment/presentation/cubits/comment_cubit.dart';
 import '../features/comment/presentation/pages/send_comment_page.dart';
 import '../features/favorites/presentation/cubits/favorites_cubit.dart';
@@ -34,12 +37,15 @@ GoRouter createRouter(AuthCubit authCubit) {
 
       final isOnAuth = path == '/welcome' ||
           path == '/sign-up' ||
+          path == '/login' ||
           path == '/create-profile';
 
       if (authState is AuthLoading || authState is AuthInitial) return null;
 
       if (authState is AuthUnauthenticated) {
-        return isOnAuth ? null : '/welcome';
+        if (isOnAuth) return null;
+        if (_isPublicPathWhenLoggedOut(path)) return null;
+        return '/welcome';
       }
 
       if (authState is AuthNeedsProfile) {
@@ -72,9 +78,32 @@ GoRouter createRouter(AuthCubit authCubit) {
         builder: (_, __) => const SignUpPage(),
       ),
       GoRoute(
+        path: '/login',
+        name: RouteNames.login,
+        builder: (_, __) => const LoginPage(),
+      ),
+      GoRoute(
         path: '/create-profile',
         name: RouteNames.createProfile,
         builder: (_, __) => const CreateProfilePage(),
+      ),
+      // Comment detail — accessible from anywhere via context.push
+      GoRoute(
+        path: '/comments/:id',
+        name: RouteNames.commentDetail,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          return BlocProvider(
+            create: (_) => getIt<BoardCubit>(),
+            child: CommentDetailPage(
+              commentId: state.pathParameters['id']!,
+              commentText: extra['text'] as String? ?? '',
+              commentCreatedAt: extra['createdAt'] as DateTime? ?? DateTime.now(),
+              boardOwnerUid: extra['boardOwnerUid'] as String? ?? '',
+              isOwner: extra['isOwner'] as bool? ?? false,
+            ),
+          );
+        },
       ),
       StatefulShellRoute.indexedStack(
         builder: (_, __, navigationShell) =>
@@ -197,6 +226,13 @@ GoRouter createRouter(AuthCubit authCubit) {
                       create: (_) => getIt<ProfileCubit>(),
                       child: const SettingsPage(),
                     ),
+                    routes: [
+                      GoRoute(
+                        path: 'change-password',
+                        name: RouteNames.changePassword,
+                        builder: (_, __) => const ChangePasswordPage(),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -212,4 +248,24 @@ class _AuthStateListenable extends ChangeNotifier {
   _AuthStateListenable(AuthCubit cubit) {
     cubit.stream.listen((_) => notifyListeners());
   }
+}
+
+bool _isPublicPathWhenLoggedOut(String path) {
+  final segments = path.split('/').where((s) => s.isNotEmpty).toList();
+  if (segments.length >= 2 && segments[0] == 'u' && segments[1].isNotEmpty) {
+    return true;
+  }
+  if (segments.length >= 2 &&
+      segments[0] == 'search' &&
+      segments[1].isNotEmpty) {
+    if (segments.length == 2) return true;
+    if (segments.length == 3 && segments[2] == 'comment') return true;
+  }
+  if (segments.length >= 2 &&
+      segments[0] == 'comments' &&
+      segments[1].isNotEmpty &&
+      segments.length == 2) {
+    return true;
+  }
+  return false;
 }

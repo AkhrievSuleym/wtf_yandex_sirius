@@ -57,6 +57,66 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
+  Future<void> createProfile({
+    required String username,
+    required String displayName,
+    required String bio,
+  }) async {
+    AppLogger.i(_tag, 'createProfile: username=$username');
+    emit(const AuthLoading());
+    try {
+      await _authRepository.createProfile(
+        username: username,
+        displayName: displayName,
+        bio: bio,
+      );
+      // Re-fetch user to transition to Authenticated
+      checkAuthStatus();
+    } catch (e) {
+      AppLogger.e(_tag, 'createProfile failed', e);
+      final message = e is Exception
+          ? e.toString().replaceFirst('Exception: ', '')
+          : e.toString();
+      emit(AuthError(message));
+    }
+  }
+
+  Future<void> loginWithPassword({
+    required String username,
+    required String password,
+  }) async {
+    AppLogger.i(_tag, 'loginWithPassword: username=$username');
+    emit(const AuthLoading());
+    try {
+      final user = await _authRepository.loginWithPassword(
+        username: username,
+        password: password,
+      );
+      AppLogger.i(_tag, 'state → Authenticated @${user.username}');
+      emit(AuthAuthenticated(user));
+    } catch (e) {
+      AppLogger.e(_tag, 'loginWithPassword failed', e);
+      final message = e is Exception
+          ? e.toString().replaceFirst('Exception: ', '')
+          : e.toString();
+      emit(AuthError(message));
+    }
+  }
+
+  Future<void> setPassword(String password) async {
+    AppLogger.i(_tag, 'setPassword');
+    try {
+      await _authRepository.setPassword(password);
+    } catch (e) {
+      AppLogger.e(_tag, 'setPassword failed', e);
+      rethrow;
+    }
+  }
+
+  Future<bool> isUsernameAvailable(String username) {
+    return _authRepository.isUsernameAvailable(username);
+  }
+
   Future<void> signOut() async {
     AppLogger.i(_tag, 'signOut');
     await _authRepository.signOut();

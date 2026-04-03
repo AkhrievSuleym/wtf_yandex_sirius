@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../core/utils/app_logger.dart';
 import '../../../../core/widgets/app_error_widget.dart';
 import '../../../../core/widgets/shimmer_widgets.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
@@ -20,12 +21,21 @@ class BoardPage extends StatefulWidget {
 }
 
 class _BoardPageState extends State<BoardPage> {
+  static const _tag = 'BoardPage';
+
   @override
   void initState() {
     super.initState();
+    _trySubscribe();
+  }
+
+  void _trySubscribe() {
     final authState = context.read<AuthCubit>().state;
     if (authState is AuthAuthenticated) {
+      AppLogger.d(_tag, 'initState: subscribing uid=${authState.user.uid}');
       context.read<BoardCubit>().subscribeToBoard(authState.user.uid);
+    } else {
+      AppLogger.d(_tag, 'initState: auth not ready (${authState.runtimeType}), will wait');
     }
   }
 
@@ -46,7 +56,14 @@ class _BoardPageState extends State<BoardPage> {
         ? authState.user.uid
         : '';
 
-    return Scaffold(
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, authState) {
+        if (authState is AuthAuthenticated) {
+          AppLogger.d(_tag, 'auth resolved, subscribing uid=${authState.user.uid}');
+          context.read<BoardCubit>().subscribeToBoard(authState.user.uid);
+        }
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Моя доска'),
         actions: [
@@ -127,11 +144,6 @@ class _BoardPageState extends State<BoardPage> {
                                 .read<BoardCubit>()
                                 .deleteComment(comment.id);
                           },
-                          onTap: comment.isRead
-                              ? null
-                              : () => context
-                                  .read<BoardCubit>()
-                                  .markAsRead(comment.id),
                         )
                             .animate(delay: Duration(milliseconds: 40 * index))
                             .fadeIn(duration: 200.ms)
@@ -142,6 +154,7 @@ class _BoardPageState extends State<BoardPage> {
           };
         },
       ),
+    ),
     );
   }
 }

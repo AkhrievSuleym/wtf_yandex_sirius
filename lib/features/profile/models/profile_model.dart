@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../board/models/comment_model.dart';
 
 class ProfileModel {
   final String uid;
@@ -8,8 +8,9 @@ class ProfileModel {
   final String? avatarUrl;
   final int commentCount;
   final bool isPublic;
+  final Map<String, int> reactionStats;
 
-  const ProfileModel({
+  ProfileModel({
     required this.uid,
     required this.username,
     required this.displayName,
@@ -17,7 +18,28 @@ class ProfileModel {
     this.avatarUrl,
     required this.commentCount,
     required this.isPublic,
-  });
+    Map<String, int>? reactionStats,
+  }) : reactionStats = reactionStats ?? _emptyReactionStats();
+
+  static Map<String, int> _emptyReactionStats() => Map<String, int>.fromEntries(
+        CommentModel.reactionKeys.map((k) => MapEntry(k, 0)),
+      );
+
+  static Map<String, int> _parseReactionStats(Object? raw) {
+    final base = _emptyReactionStats();
+    if (raw is Map) {
+      for (final e in raw.entries) {
+        final k = e.key.toString();
+        final v = e.value;
+        if (v is int) {
+          base[k] = v;
+        } else if (v is num) {
+          base[k] = v.toInt();
+        }
+      }
+    }
+    return base;
+  }
 
   ProfileModel copyWith({
     String? uid,
@@ -27,6 +49,7 @@ class ProfileModel {
     String? avatarUrl,
     int? commentCount,
     bool? isPublic,
+    Map<String, int>? reactionStats,
   }) {
     return ProfileModel(
       uid: uid ?? this.uid,
@@ -36,8 +59,20 @@ class ProfileModel {
       avatarUrl: avatarUrl ?? this.avatarUrl,
       commentCount: commentCount ?? this.commentCount,
       isPublic: isPublic ?? this.isPublic,
+      reactionStats: reactionStats ?? Map<String, int>.from(this.reactionStats),
     );
   }
+
+  factory ProfileModel.fromJson(Map<String, dynamic> json) => ProfileModel(
+        uid: json['uid'] as String,
+        username: json['username'] as String? ?? '',
+        displayName: json['displayName'] as String? ?? '',
+        bio: json['bio'] as String? ?? '',
+        avatarUrl: json['avatarUrl'] as String?,
+        commentCount: json['commentCount'] as int? ?? 0,
+        isPublic: json['isPublic'] as bool? ?? true,
+        reactionStats: _parseReactionStats(json['reactionStats']),
+      );
 
   Map<String, dynamic> toJson() => {
         'uid': uid,
@@ -47,32 +82,6 @@ class ProfileModel {
         'avatarUrl': avatarUrl,
         'commentCount': commentCount,
         'isPublic': isPublic,
+        'reactionStats': reactionStats,
       };
-
-  factory ProfileModel.fromJson(Map<String, dynamic> json) => ProfileModel(
-        uid: json['uid'] as String,
-        username: json['username'] as String,
-        displayName: json['displayName'] as String,
-        bio: json['bio'] as String? ?? '',
-        avatarUrl: json['avatarUrl'] as String?,
-        commentCount: json['commentCount'] as int? ?? 0,
-        isPublic: json['isPublic'] as bool? ?? true,
-      );
-
-  factory ProfileModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return ProfileModel.fromJson(data);
-  }
-
-  factory ProfileModel.fromFavoritesDoc(Map<String, dynamic> data) {
-    return ProfileModel(
-      uid: data['favoriteUid'] as String,
-      username: data['username'] as String,
-      displayName: data['displayName'] as String,
-      bio: '',
-      avatarUrl: data['avatarUrl'] as String?,
-      commentCount: 0,
-      isPublic: true,
-    );
-  }
 }

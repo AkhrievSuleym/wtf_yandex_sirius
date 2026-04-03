@@ -21,7 +21,7 @@ class ProfileLoaded extends ProfileState {
   const ProfileLoaded(this.profile);
 
   @override
-  List<Object?> get props => [profile.uid];
+  List<Object?> get props => [profile.uid, profile.isPublic, profile.displayName, profile.bio, profile.avatarUrl];
 }
 
 class ProfileUpdating extends ProfileState {
@@ -29,7 +29,7 @@ class ProfileUpdating extends ProfileState {
   const ProfileUpdating(this.profile);
 
   @override
-  List<Object?> get props => [profile.uid];
+  List<Object?> get props => [profile.uid, profile.isPublic];
 }
 
 class ProfileError extends ProfileState {
