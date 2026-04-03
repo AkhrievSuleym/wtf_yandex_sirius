@@ -20,10 +20,12 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 func (r *Repository) ListByOwner(ctx context.Context, ownerID string) ([]model.Comment, error) {
 	// Fetch comments
 	rows, err := r.db.Query(ctx, `
-		SELECT id::text, board_owner_id::text, author_id::text, text, is_read, created_at
-		FROM comments
-		WHERE board_owner_id = $1::uuid
-		ORDER BY created_at DESC
+		SELECT c.id::text, c.board_owner_id::text, c.author_id::text, c.text, c.is_read, c.created_at,
+		       u.avatar_url
+		FROM comments c
+		LEFT JOIN users u ON c.author_id IS NOT NULL AND c.author_id = u.uid
+		WHERE c.board_owner_id = $1::uuid
+		ORDER BY c.created_at DESC
 	`, ownerID)
 	if err != nil {
 		return nil, err
@@ -36,10 +38,12 @@ func (r *Repository) ListByOwner(ctx context.Context, ownerID string) ([]model.C
 	for rows.Next() {
 		var c model.Comment
 		var authorID *string
-		if err := rows.Scan(&c.ID, &c.BoardOwnerID, &authorID, &c.Text, &c.IsRead, &c.CreatedAt); err != nil {
+		var authorAvatar *string
+		if err := rows.Scan(&c.ID, &c.BoardOwnerID, &authorID, &c.Text, &c.IsRead, &c.CreatedAt, &authorAvatar); err != nil {
 			return nil, err
 		}
 		c.AuthorID = authorID
+		c.AuthorAvatarURL = authorAvatar
 		c.Reactions = model.DefaultReactions()
 		c.ReactedBy = model.DefaultReactedBy()
 		idIndex[c.ID] = len(comments)
@@ -166,6 +170,13 @@ func (r *Repository) GetOwner(ctx context.Context, commentID string) (string, er
 	return ownerID, err
 }
 
+// GetAuthorID returns author_id for a comment (nil if anonymous).
+func (r *Repository) GetAuthorID(ctx context.Context, commentID string) (*string, error) {
+	var authorID *string
+	err := r.db.QueryRow(ctx, `SELECT author_id::text FROM comments WHERE id = $1::uuid`, commentID).Scan(&authorID)
+	return authorID, err
+}
+
 func (r *Repository) Delete(ctx context.Context, commentID string) error {
 	_, err := r.db.Exec(ctx, `DELETE FROM comments WHERE id = $1::uuid`, commentID)
 	return err
@@ -175,14 +186,19 @@ func (r *Repository) Delete(ctx context.Context, commentID string) error {
 func (r *Repository) GetWithReactions(ctx context.Context, commentID string) (*model.Comment, error) {
 	var c model.Comment
 	var authorID *string
+	var authorAvatar *string
 	err := r.db.QueryRow(ctx, `
-		SELECT id::text, board_owner_id::text, author_id::text, text, is_read, created_at
-		FROM comments WHERE id = $1::uuid
-	`, commentID).Scan(&c.ID, &c.BoardOwnerID, &authorID, &c.Text, &c.IsRead, &c.CreatedAt)
+		SELECT c.id::text, c.board_owner_id::text, c.author_id::text, c.text, c.is_read, c.created_at,
+		       u.avatar_url
+		FROM comments c
+		LEFT JOIN users u ON c.author_id IS NOT NULL AND c.author_id = u.uid
+		WHERE c.id = $1::uuid
+	`, commentID).Scan(&c.ID, &c.BoardOwnerID, &authorID, &c.Text, &c.IsRead, &c.CreatedAt, &authorAvatar)
 	if err != nil {
 		return nil, err
 	}
 	c.AuthorID = authorID
+	c.AuthorAvatarURL = authorAvatar
 	c.Reactions = model.DefaultReactions()
 	c.ReactedBy = model.DefaultReactedBy()
 

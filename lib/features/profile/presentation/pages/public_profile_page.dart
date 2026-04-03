@@ -135,7 +135,7 @@ class _PublicProfilePageState extends State<PublicProfilePage> {
                               key: ValueKey(comment.id),
                               comment: comment,
                               currentUserId: currentUserId,
-                              isOwner: false,
+                              isBoardOwnerView: false,
                               onToggleReaction: (key) async {
                                 await context.read<BoardCubit>().toggleReaction(
                                       comment.id,
@@ -146,9 +146,14 @@ class _PublicProfilePageState extends State<PublicProfilePage> {
                                 context.read<ProfileCubit>().loadProfile(
                                       widget.uid,
                                       silent: true,
-                                    );
+                                );
                               },
-                              onDelete: () {},
+                              onDelete: currentUserId.isNotEmpty &&
+                                      comment.authorId == currentUserId
+                                  ? () => context
+                                      .read<BoardCubit>()
+                                      .deleteComment(comment.id)
+                                  : null,
                             );
                           },
                         ),

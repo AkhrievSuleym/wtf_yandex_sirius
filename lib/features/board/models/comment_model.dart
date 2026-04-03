@@ -1,7 +1,10 @@
+import '../../../core/utils/avatar_url.dart';
+
 class CommentModel {
   final String id;
   final String boardOwnerId;
   final String? authorId;
+  final String? authorAvatarUrl;
   final String text;
   final DateTime createdAt;
   final Map<String, int> reactions;
@@ -13,6 +16,7 @@ class CommentModel {
     required this.id,
     required this.boardOwnerId,
     this.authorId,
+    this.authorAvatarUrl,
     required this.text,
     required this.createdAt,
     required this.reactions,
@@ -59,6 +63,7 @@ class CommentModel {
     String? id,
     String? boardOwnerId,
     String? authorId,
+    String? authorAvatarUrl,
     String? text,
     DateTime? createdAt,
     Map<String, int>? reactions,
@@ -70,6 +75,7 @@ class CommentModel {
       id: id ?? this.id,
       boardOwnerId: boardOwnerId ?? this.boardOwnerId,
       authorId: authorId ?? this.authorId,
+      authorAvatarUrl: authorAvatarUrl ?? this.authorAvatarUrl,
       text: text ?? this.text,
       createdAt: createdAt ?? this.createdAt,
       reactions: reactions ?? this.reactions,
@@ -77,6 +83,12 @@ class CommentModel {
       isRead: isRead ?? this.isRead,
       replyCount: replyCount ?? this.replyCount,
     );
+  }
+
+  static String? _parseAuthorAvatar(Object? raw) {
+    if (raw == null) return null;
+    if (raw is! String) return null;
+    return resolveAvatarUrl(raw);
   }
 
   static Map<String, int> _mergeReactions(Map? raw) {
@@ -100,8 +112,7 @@ class CommentModel {
     );
     if (raw != null) {
       raw.forEach((k, v) {
-        final key = k as String;
-        m[key] = List<String>.from(v as List? ?? []);
+        m[k] = List<String>.from(v as List? ?? []);
       });
     }
     return m;
@@ -115,6 +126,7 @@ class CommentModel {
       id: json['id'] as String,
       boardOwnerId: json['boardOwnerId'] as String,
       authorId: json['authorId'] as String?,
+      authorAvatarUrl: _parseAuthorAvatar(json['authorAvatarUrl']),
       text: json['text'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
       reactions: _mergeReactions(json['reactions'] as Map?),

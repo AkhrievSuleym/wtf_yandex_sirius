@@ -40,7 +40,6 @@ class _SettingsPageState extends State<SettingsPage> {
           return ListView(
             children: [
               if (isUpdating) const LinearProgressIndicator(),
-              // Board visibility
               SwitchListTile(
                 title: const Text('Публичная доска'),
                 subtitle: const Text('Все могут видеть сообщения на вашей доске'),
@@ -80,16 +79,19 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _confirmSignOut(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Выйти?'),
         content: const Text('Войти обратно можно только если у вас установлен пароль.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Отмена')),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Отмена'),
+          ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               context.read<AuthCubit>().signOut();
             },
             child: const Text('Выйти'),
@@ -100,16 +102,19 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _confirmDeleteAccount(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Удалить аккаунт?'),
         content: const Text('Все ваши данные будут удалены безвозвратно.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Отмена')),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Отмена'),
+          ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               context.read<AuthCubit>().deleteAccount();
             },
             style: TextButton.styleFrom(foregroundColor: AppColors.error),

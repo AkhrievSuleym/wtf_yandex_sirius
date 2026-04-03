@@ -103,7 +103,7 @@ GoRouter createRouter(AuthCubit authCubit) {
         name: RouteNames.commentDetail,
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>? ?? {};
-          return BlocProvider(
+            return BlocProvider(
             create: (_) => getIt<BoardCubit>(),
             child: CommentDetailPage(
               commentId: state.pathParameters['id']!,
@@ -111,6 +111,8 @@ GoRouter createRouter(AuthCubit authCubit) {
               commentCreatedAt: extra['createdAt'] as DateTime? ?? DateTime.now(),
               boardOwnerUid: extra['boardOwnerUid'] as String? ?? '',
               isOwner: extra['isOwner'] as bool? ?? false,
+              commentAuthorId: extra['authorId'] as String?,
+              commentAuthorAvatarUrl: extra['authorAvatarUrl'] as String?,
             ),
           );
         },

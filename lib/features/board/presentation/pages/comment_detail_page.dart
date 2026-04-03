@@ -8,6 +8,7 @@ import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../../../auth/presentation/cubits/auth_state.dart';
+import '../../../profile/presentation/widgets/profile_avatar.dart';
 import '../cubits/board_cubit.dart';
 import '../../models/reply_model.dart';
 
@@ -17,6 +18,8 @@ class CommentDetailPage extends StatefulWidget {
   final DateTime commentCreatedAt;
   final String boardOwnerUid;
   final bool isOwner;
+  final String? commentAuthorId;
+  final String? commentAuthorAvatarUrl;
 
   const CommentDetailPage({
     super.key,
@@ -25,6 +28,8 @@ class CommentDetailPage extends StatefulWidget {
     required this.commentCreatedAt,
     required this.boardOwnerUid,
     required this.isOwner,
+    this.commentAuthorId,
+    this.commentAuthorAvatarUrl,
   });
 
   @override
@@ -153,6 +158,10 @@ class _CommentDetailPageState extends State<CommentDetailPage> {
                 _CommentBubble(
                   text: widget.commentText,
                   createdAt: widget.commentCreatedAt,
+                  boardOwnerUid: widget.boardOwnerUid,
+                  authorId: widget.commentAuthorId,
+                  authorAvatarUrl: widget.commentAuthorAvatarUrl,
+                  currentUserId: currentUserId,
                   theme: theme,
                 ),
                 const SizedBox(height: 16),
@@ -187,10 +196,9 @@ class _CommentDetailPageState extends State<CommentDetailPage> {
                         reply: reply,
                         boardOwnerUid: widget.boardOwnerUid,
                         currentUserId: currentUserId,
-                        canDelete: widget.isOwner ||
-                            (currentUserId.isNotEmpty &&
-                                reply.ownerUid != null &&
-                                reply.ownerUid == currentUserId),
+                        canDelete: currentUserId.isNotEmpty &&
+                            reply.ownerUid != null &&
+                            reply.ownerUid == currentUserId,
                         onDelete: () => _deleteReply(reply.id),
                         theme: theme,
                       ))),
@@ -211,13 +219,50 @@ class _CommentDetailPageState extends State<CommentDetailPage> {
 class _CommentBubble extends StatelessWidget {
   final String text;
   final DateTime createdAt;
+  final String boardOwnerUid;
+  final String? authorId;
+  final String? authorAvatarUrl;
+  final String currentUserId;
   final ThemeData theme;
 
   const _CommentBubble({
     required this.text,
     required this.createdAt,
+    required this.boardOwnerUid,
+    required this.authorId,
+    required this.authorAvatarUrl,
+    required this.currentUserId,
     required this.theme,
   });
+
+  String get _label {
+    if (authorId == null) return 'Анонимно';
+    if (authorId == currentUserId) return 'Ты';
+    if (authorId == boardOwnerUid) return 'Владелец доски';
+    return 'Участник';
+  }
+
+  Color get _chipBg {
+    if (authorId == null) return AppColors.memeYellow.withValues(alpha: 0.92);
+    if (authorId == currentUserId) return AppColors.memeLime.withValues(alpha: 0.88);
+    if (authorId == boardOwnerUid) {
+      return AppColors.memeViolet.withValues(alpha: 0.35);
+    }
+    return AppColors.primary.withValues(alpha: 0.14);
+  }
+
+  Color get _border {
+    if (authorId == null) return AppColors.ink.withValues(alpha: 0.12);
+    if (authorId == currentUserId) {
+      return AppColors.memeLime.withValues(alpha: 0.65);
+    }
+    if (authorId == boardOwnerUid) {
+      return AppColors.memeViolet.withValues(alpha: 0.55);
+    }
+    return AppColors.primary.withValues(alpha: 0.35);
+  }
+
+  double get _borderW => authorId == null ? 1.5 : 2;
 
   @override
   Widget build(BuildContext context) {
@@ -227,8 +272,8 @@ class _CommentBubble extends StatelessWidget {
         color: AppColors.secondary.withValues(alpha: 0.16),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.ink.withValues(alpha: 0.12),
-          width: 1.5,
+          color: _border,
+          width: _borderW,
         ),
         boxShadow: [
           BoxShadow(
@@ -242,31 +287,45 @@ class _CommentBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.memeYellow.withValues(alpha: 0.92),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: AppColors.ink.withValues(alpha: 0.2),
-                    width: 1.25,
-                  ),
-                ),
-                child: const Text(
-                  'Анонимно',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.ink,
-                  ),
-                ),
+              ProfileAvatar(
+                avatarUrl: authorAvatarUrl,
+                size: 44,
               ),
-              const Spacer(),
-              Text(
-                DateFormatter.relative(createdAt),
-                style: theme.textTheme.bodySmall,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _chipBg,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: AppColors.ink.withValues(alpha: 0.2),
+                          width: 1.25,
+                        ),
+                      ),
+                      child: Text(
+                        _label,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      DateFormatter.relative(createdAt),
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -311,9 +370,13 @@ class _ReplyBubble extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(width: 24),
+          const SizedBox(width: 8),
+          ProfileAvatar(
+            avatarUrl: reply.ownerAvatarUrl,
+            size: 36,
+          ),
           const Padding(
-            padding: EdgeInsets.only(top: 8, right: 8),
+            padding: EdgeInsets.only(top: 10, left: 4, right: 4),
             child: Icon(
               Icons.subdirectory_arrow_right,
               size: 16,
@@ -370,18 +433,18 @@ class _ReplyBubble extends StatelessWidget {
   }
 
   void _confirmDelete(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Удалить ответ?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Отмена'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               onDelete();
             },
             style: TextButton.styleFrom(foregroundColor: AppColors.error),

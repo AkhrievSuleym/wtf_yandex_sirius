@@ -77,6 +77,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                   children: [
                     ProfileHeader(
                       profile: profile,
+                      avatarEditBadge: true,
                       onAvatarTap: state is ProfileUpdating ? null : _pickAvatar,
                     ),
                     if (state is ProfileUpdating)

@@ -134,7 +134,7 @@ class _BoardPageState extends State<BoardPage> {
                           key: ValueKey(comment.id),
                           comment: comment,
                           currentUserId: userId,
-                          isOwner: true,
+                          isBoardOwnerView: true,
                           onToggleReaction: (key) async {
                             await context.read<BoardCubit>().toggleReaction(
                                   comment.id,
@@ -149,11 +149,12 @@ class _BoardPageState extends State<BoardPage> {
                                   );
                             }
                           },
-                          onDelete: () {
-                            context
-                                .read<BoardCubit>()
-                                .deleteComment(comment.id);
-                          },
+                          onDelete: userId.isNotEmpty &&
+                                  comment.authorId == userId
+                              ? () => context
+                                  .read<BoardCubit>()
+                                  .deleteComment(comment.id)
+                              : null,
                         );
                       },
                     ),

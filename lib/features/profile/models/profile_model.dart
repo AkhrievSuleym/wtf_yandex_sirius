@@ -1,3 +1,4 @@
+import '../../../core/utils/avatar_url.dart';
 import '../../board/models/comment_model.dart';
 
 class ProfileModel {
@@ -68,7 +69,7 @@ class ProfileModel {
         username: json['username'] as String? ?? '',
         displayName: json['displayName'] as String? ?? '',
         bio: json['bio'] as String? ?? '',
-        avatarUrl: json['avatarUrl'] as String?,
+        avatarUrl: resolveAvatarUrl(json['avatarUrl'] as String?),
         commentCount: json['commentCount'] as int? ?? 0,
         isPublic: json['isPublic'] as bool? ?? true,
         reactionStats: _parseReactionStats(json['reactionStats']),

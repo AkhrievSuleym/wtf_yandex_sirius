@@ -2,26 +2,86 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../profile/presentation/widgets/profile_avatar.dart';
 import '../../models/comment_model.dart';
 import 'reaction_bar.dart';
+
+enum _CommentKind { anonymous, mine, boardOwnerAuthor, other }
 
 class CommentCard extends StatelessWidget {
   final CommentModel comment;
   final String currentUserId;
-  final bool isOwner;
+  final bool isBoardOwnerView;
   final Future<void> Function(String reactionKey) onToggleReaction;
-  final VoidCallback onDelete;
+  final VoidCallback? onDelete;
   final VoidCallback? onTap;
 
   const CommentCard({
     super.key,
     required this.comment,
     required this.currentUserId,
-    required this.isOwner,
+    required this.isBoardOwnerView,
     required this.onToggleReaction,
-    required this.onDelete,
+    this.onDelete,
     this.onTap,
   });
+
+  _CommentKind get _kind {
+    if (comment.authorId == null) return _CommentKind.anonymous;
+    if (comment.authorId == currentUserId) return _CommentKind.mine;
+    if (comment.authorId == comment.boardOwnerId) {
+      return _CommentKind.boardOwnerAuthor;
+    }
+    return _CommentKind.other;
+  }
+
+  String get _roleLabel {
+    switch (_kind) {
+      case _CommentKind.anonymous:
+        return 'Анонимно';
+      case _CommentKind.mine:
+        return 'Ты';
+      case _CommentKind.boardOwnerAuthor:
+        return 'Владелец доски';
+      case _CommentKind.other:
+        return 'Участник';
+    }
+  }
+
+  Color get _chipBg {
+    switch (_kind) {
+      case _CommentKind.anonymous:
+        return AppColors.memeYellow.withValues(alpha: 0.9);
+      case _CommentKind.mine:
+        return AppColors.memeLime.withValues(alpha: 0.88);
+      case _CommentKind.boardOwnerAuthor:
+        return AppColors.memeViolet.withValues(alpha: 0.35);
+      case _CommentKind.other:
+        return AppColors.primary.withValues(alpha: 0.14);
+    }
+  }
+
+  Color get _cardBorder {
+    switch (_kind) {
+      case _CommentKind.anonymous:
+        return AppColors.ink.withValues(alpha: 0.1);
+      case _CommentKind.mine:
+        return AppColors.memeLime.withValues(alpha: 0.65);
+      case _CommentKind.boardOwnerAuthor:
+        return AppColors.memeViolet.withValues(alpha: 0.55);
+      case _CommentKind.other:
+        return AppColors.primary.withValues(alpha: 0.35);
+    }
+  }
+
+  double get _cardBorderWidth {
+    switch (_kind) {
+      case _CommentKind.anonymous:
+        return 1.25;
+      default:
+        return 2;
+    }
+  }
 
   void _openDetail(BuildContext context) {
     context.push(
@@ -30,7 +90,9 @@ class CommentCard extends StatelessWidget {
         'text': comment.text,
         'createdAt': comment.createdAt,
         'boardOwnerUid': comment.boardOwnerId,
-        'isOwner': isOwner,
+        'isOwner': isBoardOwnerView,
+        'authorId': comment.authorId,
+        'authorAvatarUrl': comment.authorAvatarUrl,
       },
     );
     onTap?.call();
@@ -40,8 +102,7 @@ class CommentCard extends StatelessWidget {
 
   bool get _showNewBadge {
     if (comment.isRead) return false;
-    final cutoff =
-        DateTime.now().toUtc().subtract(_newBadgeMaxAge);
+    final cutoff = DateTime.now().toUtc().subtract(_newBadgeMaxAge);
     return comment.createdAt.toUtc().isAfter(cutoff);
   }
 
@@ -51,6 +112,10 @@ class CommentCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: _cardBorder, width: _cardBorderWidth),
+      ),
       child: InkWell(
         onTap: () => _openDetail(context),
         borderRadius: BorderRadius.circular(18),
@@ -60,62 +125,77 @@ class CommentCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.memeYellow.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: AppColors.ink.withValues(alpha: 0.18),
-                        width: 1.25,
-                      ),
-                    ),
-                    child: const Text(
-                      'Анонимно',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.ink,
-                      ),
+                  ProfileAvatar(
+                    avatarUrl: comment.authorAvatarUrl,
+                    size: 44,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _chipBg,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: AppColors.ink.withValues(alpha: 0.18),
+                                width: 1.25,
+                              ),
+                            ),
+                            child: Text(
+                              _roleLabel,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.ink,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        if (_showNewBadge)
+                          Container(
+                            margin: const EdgeInsets.only(right: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.memePeach.withValues(alpha: 0.95),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color:
+                                    AppColors.memeOrange.withValues(alpha: 0.45),
+                                width: 1.25,
+                              ),
+                            ),
+                            child: const Text(
+                              'Новое',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.ink,
+                              ),
+                            ),
+                          ),
+                        Text(
+                          DateFormatter.relative(comment.createdAt),
+                          style: theme.textTheme.bodySmall,
+                        ),
+                        if (onDelete != null) ...[
+                          const SizedBox(width: 4),
+                          _DeleteButton(onDelete: onDelete!),
+                        ],
+                      ],
                     ),
                   ),
-                  const Spacer(),
-                  if (_showNewBadge)
-                    Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.memePeach.withValues(alpha: 0.95),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: AppColors.memeOrange.withValues(alpha: 0.45),
-                          width: 1.25,
-                        ),
-                      ),
-                      child: const Text(
-                        'Новое',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.ink,
-                        ),
-                      ),
-                    ),
-                  Text(
-                    DateFormatter.relative(comment.createdAt),
-                    style: theme.textTheme.bodySmall,
-                  ),
-                  if (isOwner) ...[
-                    const SizedBox(width: 4),
-                    _DeleteButton(onDelete: onDelete),
-                  ],
                 ],
               ),
               const SizedBox(height: 12),
@@ -179,19 +259,19 @@ class _DeleteButton extends StatelessWidget {
   }
 
   void _showDeleteDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Удалить сообщение?'),
         content: const Text('Это действие нельзя отменить.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Отмена'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               onDelete();
             },
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
