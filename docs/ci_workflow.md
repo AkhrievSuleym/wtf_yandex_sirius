@@ -6,6 +6,7 @@
 flowchart TD
     PUSH["fa:fa-code-commit Push"] --> PUSH_CI
     PR["fa:fa-code-pull-request Pull Request"] --> PR_CI
+    MAIN["fa:fa-code-branch Main"] --> MAIN_CI
 
     subgraph PUSH_CI["Push CI — ранние предупреждения"]
         C1("1. dart format") --> C1Q(["Формат верен?"])
@@ -25,25 +26,17 @@ flowchart TD
     end
 
     subgraph PR_CI["PR CI — полная блокировка"]
-        P1("1. dart format") --> P1Q(["Формат верен?"])
-        P1Q -->|Да| P2("2. flutter pub get")
-        P1Q -.->|Нет| P1F("fa:fa-ban Отклонено: форматирование")
-        P1F ~~~ P2
+        P1("1. flutter test") --> P1Q(["Тесты прошли?"])
+        P1Q -->|Да| P_OK("fa:fa-circle-check PR CI пройден — можно мержить")
+        P1Q -.->|Нет| P1F("fa:fa-ban Отклонено: тесты")
+        P1F ~~~ P_OK
+    end
 
-        P2 --> P2Q(["Зависимости разрешены?"])
-        P2Q -->|Да| P3("3. flutter analyze")
-        P2Q -.->|Нет| P2F("fa:fa-ban Отклонено: зависимости")
-        P2F ~~~ P3
-
-        P3 --> P3Q(["Анализ без ошибок?"])
-        P3Q -->|Да| P4("4. flutter test")
-        P3Q -.->|Нет| P3F("fa:fa-ban Отклонено: lint и Flutter-правила")
-        P3F ~~~ P4
-
-        P4 --> P4Q(["Все тесты прошли?"])
-        P4Q -->|Да| P_OK("fa:fa-circle-check PR CI пройден — можно мержить")
-        P4Q -.->|Нет| P4F("fa:fa-ban Отклонено: тесты")
-        P4F ~~~ P_OK
+    subgraph MAIN_CI["Main CI — финальная проверка"]
+        M1("1. flutter test") --> M1Q(["Тесты прошли?"])
+        M1Q -->|Да| M_OK("fa:fa-circle-check Main CI пройден")
+        M1Q -.->|Нет| M1F("fa:fa-ban Отклонено: тесты")
+        M1F ~~~ M_OK
     end
 ```
 
@@ -76,9 +69,10 @@ flowchart TD
 
 ## GitHub Actions
 
-В репозитории настроены два рабочих процесса:
+В репозитории настроены рабочие процессы:
 
-- Push CI: запускается при каждом коммите в любую ветку.
-- PR CI: запускается при создании или обновлении Pull Request.
+- Push CI: запускается при каждом коммите в любую ветку. Проверяет форматирование, зависимости и статический анализ.
+- PR CI: запускается при создании или обновлении Pull Request. Запускает тесты с покрытием и блокирует слияние при ошибках.
+- Main CI: запускается при пуше в `main`. Запускает тесты с покрытием для гарантии работоспособности.
 
 Подробности — в файлах `.github/workflows/`.
