@@ -73,8 +73,7 @@ void main() {
     blocTest<AuthCubit, AuthState>(
       'emits [Loading, Unauthenticated] when stream emits null',
       build: () {
-        when(mockRepo.authStateChanges())
-            .thenAnswer((_) => Stream.value(null));
+        when(mockRepo.authStateChanges()).thenAnswer((_) => Stream.value(null));
         return AuthCubit(mockRepo);
       },
       act: (cubit) => cubit.checkAuthStatus(),
@@ -103,8 +102,7 @@ void main() {
     blocTest<AuthCubit, AuthState>(
       'emits [Loading, NeedsProfile] for new anonymous user',
       build: () {
-        when(mockRepo.signUpAnonymous())
-            .thenAnswer((_) async => userNoProfile);
+        when(mockRepo.signUpAnonymous()).thenAnswer((_) async => userNoProfile);
         return AuthCubit(mockRepo);
       },
       act: (cubit) => cubit.signUpAnonymous(),
@@ -131,8 +129,7 @@ void main() {
     blocTest<AuthCubit, AuthState>(
       'emits [Loading, Error] on failure',
       build: () {
-        when(mockRepo.signUpAnonymous())
-            .thenThrow(Exception('sign-in failed'));
+        when(mockRepo.signUpAnonymous()).thenThrow(Exception('sign-in failed'));
         return AuthCubit(mockRepo);
       },
       act: (cubit) => cubit.signUpAnonymous(),

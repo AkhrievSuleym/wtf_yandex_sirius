@@ -17,19 +17,15 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   ProfileRepositoryImpl(this._api);
 
-  String _resolveAvatarUrl(String relative) {
-    final base = _api.dio.options.baseUrl.replaceAll(RegExp(r'/$'), '');
-    final full = relative.startsWith('http') ? relative : '$base$relative';
-    return _avatarCacheBuster != null ? '$full?v=$_avatarCacheBuster' : full;
-  }
-
   ProfileModel _toModel(Map<String, dynamic> json) {
-    final rawAvatar = json['avatarUrl'] as String?;
-    final copy = Map<String, dynamic>.from(json);
-    if (rawAvatar != null) {
-      copy['avatarUrl'] = _resolveAvatarUrl(rawAvatar);
+    var m = ProfileModel.fromJson(json);
+    if (_avatarCacheBuster != null && m.avatarUrl != null) {
+      final u = m.avatarUrl!;
+      m = m.copyWith(
+        avatarUrl: '$u${u.contains('?') ? '&' : '?'}v=$_avatarCacheBuster',
+      );
     }
-    return ProfileModel.fromJson(copy);
+    return m;
   }
 
   @override

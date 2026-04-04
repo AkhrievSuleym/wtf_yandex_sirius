@@ -74,9 +74,7 @@ class _SearchPageState extends State<SearchPage> {
                   return SearchResultTile(
                     profile: profile,
                     onTap: () {
-                      context
-                          .read<SearchCubit>()
-                          .addProfileToHistory(profile);
+                      context.read<SearchCubit>().addProfileToHistory(profile);
                       _navigateToProfile(context, profile.uid);
                     },
                   )
@@ -120,7 +118,8 @@ class _SearchBar extends StatelessWidget {
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
         hintText: 'Поиск по никнейму...',
-        prefixIcon: const Icon(Icons.search, color: AppColors.textSecondaryLight),
+        prefixIcon:
+            const Icon(Icons.search, color: AppColors.textSecondaryLight),
         suffixIcon: ValueListenableBuilder(
           valueListenable: controller,
           builder: (_, value, __) => value.text.isNotEmpty

@@ -6,12 +6,14 @@ class ProfileAvatar extends StatelessWidget {
   final String? avatarUrl;
   final double size;
   final VoidCallback? onTap;
+  final bool showCameraBadge;
 
   const ProfileAvatar({
     super.key,
     this.avatarUrl,
     this.size = 80,
     this.onTap,
+    this.showCameraBadge = false,
   });
 
   @override
@@ -38,7 +40,7 @@ class ProfileAvatar extends StatelessWidget {
                   )
                 : _Placeholder(size: size),
           ),
-          if (onTap != null)
+          if (showCameraBadge && onTap != null)
             Positioned(
               bottom: 0,
               right: 0,
@@ -48,7 +50,8 @@ class ProfileAvatar extends StatelessWidget {
                   color: AppColors.primary,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.camera_alt, color: Colors.white, size: 14),
+                child:
+                    const Icon(Icons.camera_alt, color: Colors.white, size: 14),
               ),
             ),
         ],

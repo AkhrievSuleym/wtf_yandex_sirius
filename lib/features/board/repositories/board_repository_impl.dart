@@ -23,6 +23,8 @@ class BoardRepositoryImpl implements BoardRepository {
 
     final controller = StreamController<List<CommentModel>>();
     HttpClient? client;
+    StreamSubscription<String>? sseSub;
+    Timer? sseReconnect;
 
     Future<void> fetchAndEmit() async {
       try {
@@ -39,16 +41,27 @@ class BoardRepositoryImpl implements BoardRepository {
     }
 
     Future<void> connectSSE() async {
+      void scheduleReconnect() {
+        sseReconnect?.cancel();
+        sseReconnect = Timer(const Duration(seconds: 2), () {
+          if (!controller.isClosed) {
+            connectSSE();
+          }
+        });
+      }
+
       try {
+        await sseSub?.cancel();
+        client?.close(force: true);
         client = HttpClient();
         final token = _api.token ?? '';
-        final uri = Uri.parse(
-            '${ApiConstants.baseUrl}/comments/board/$ownerId/stream');
+        final uri =
+            Uri.parse('${ApiConstants.baseUrl}/comments/board/$ownerId/stream');
         final req = await client!.getUrl(uri);
         req.headers.set('Authorization', 'Bearer $token');
         req.headers.set('Accept', 'text/event-stream');
         final resp = await req.close();
-        resp
+        sseSub = resp
             .transform(const Utf8Decoder())
             .transform(const LineSplitter())
             .listen(
@@ -58,10 +71,19 @@ class BoardRepositoryImpl implements BoardRepository {
               fetchAndEmit();
             }
           },
-          onError: (e) => AppLogger.w(_tag, 'SSE error: $e'),
+          onError: (e) {
+            AppLogger.w(_tag, 'SSE error: $e');
+            scheduleReconnect();
+          },
+          onDone: () {
+            AppLogger.d(_tag, 'SSE stream ended');
+            scheduleReconnect();
+          },
+          cancelOnError: false,
         );
       } catch (e) {
         AppLogger.w(_tag, 'SSE connect failed: $e');
+        scheduleReconnect();
       }
     }
 
@@ -69,6 +91,8 @@ class BoardRepositoryImpl implements BoardRepository {
     connectSSE();
 
     controller.onCancel = () {
+      sseReconnect?.cancel();
+      sseSub?.cancel();
       client?.close(force: true);
     };
 

@@ -175,7 +175,12 @@ func (h *Handler) ToggleReaction(w http.ResponseWriter, r *http.Request) {
 // DELETE /comments/{id}
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	commentID := chi.URLParam(r, "id")
-	ownerID, err := h.repo.GetOwner(r.Context(), commentID)
+	caller := intmw.UID(r)
+	if caller == "" {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	authorID, err := h.repo.GetAuthorID(r.Context(), commentID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			http.Error(w, "not found", http.StatusNotFound)
@@ -184,8 +189,13 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
-	if ownerID != intmw.UID(r) {
+	if authorID == nil || *authorID != caller {
 		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+	ownerID, err := h.repo.GetOwner(r.Context(), commentID)
+	if err != nil {
+		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	if err := h.repo.Delete(r.Context(), commentID); err != nil {

@@ -118,9 +118,12 @@ GoRouter createRouter(AuthCubit authCubit) {
             child: CommentDetailPage(
               commentId: state.pathParameters['id']!,
               commentText: extra['text'] as String? ?? '',
-              commentCreatedAt: extra['createdAt'] as DateTime? ?? DateTime.now(),
+              commentCreatedAt:
+                  extra['createdAt'] as DateTime? ?? DateTime.now(),
               boardOwnerUid: extra['boardOwnerUid'] as String? ?? '',
               isOwner: extra['isOwner'] as bool? ?? false,
+              commentAuthorId: extra['authorId'] as String?,
+              commentAuthorAvatarUrl: extra['authorAvatarUrl'] as String?,
             ),
           );
         },

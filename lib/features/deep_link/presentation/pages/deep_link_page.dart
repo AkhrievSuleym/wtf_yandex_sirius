@@ -27,7 +27,8 @@ class _DeepLinkPageState extends State<DeepLinkPage> {
   Future<void> _resolve() async {
     AppLogger.d(_tag, 'resolving username=${widget.username}');
     try {
-      final uid = await getIt<SearchRepository>().resolveUsername(widget.username);
+      final uid =
+          await getIt<SearchRepository>().resolveUsername(widget.username);
       if (!mounted) return;
       if (uid != null) {
         AppLogger.i(_tag, 'resolved uid=$uid, navigating');

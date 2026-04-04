@@ -1,3 +1,5 @@
+import '../../../core/utils/avatar_url.dart';
+
 class SearchHistoryItem {
   final String query;
   final String? viewedUid;
@@ -30,7 +32,7 @@ class SearchHistoryItem {
         viewedUid: json['viewedUid'] as String?,
         viewedUsername: json['viewedUsername'] as String?,
         viewedDisplayName: json['viewedDisplayName'] as String?,
-        viewedAvatarUrl: json['viewedAvatarUrl'] as String?,
+        viewedAvatarUrl: resolveAvatarUrl(json['viewedAvatarUrl'] as String?),
         timestamp: DateTime.parse(json['timestamp'] as String),
       );
 }

@@ -13,11 +13,12 @@ import (
 )
 
 type Reply struct {
-	ID        string    `json:"id"`
-	CommentID string    `json:"commentId"`
-	OwnerUID  *string   `json:"ownerUid,omitempty"`
-	Text      string    `json:"text"`
-	CreatedAt time.Time `json:"createdAt"`
+	ID             string    `json:"id"`
+	CommentID      string    `json:"commentId"`
+	OwnerUID       *string   `json:"ownerUid,omitempty"`
+	OwnerAvatarURL *string   `json:"ownerAvatarUrl,omitempty"`
+	Text           string    `json:"text"`
+	CreatedAt      time.Time `json:"createdAt"`
 }
 
 type RepliesRepository struct {
@@ -30,8 +31,10 @@ func NewRepliesRepository(db *pgxpool.Pool) *RepliesRepository {
 
 func (r *RepliesRepository) List(ctx context.Context, commentID string) ([]Reply, error) {
 	rows, err := r.db.Query(ctx, `
-		SELECT id::text, comment_id::text, owner_uid::text, text, created_at
-		FROM replies WHERE comment_id = $1::uuid ORDER BY created_at ASC
+		SELECT r.id::text, r.comment_id::text, r.owner_uid::text, r.text, r.created_at, u.avatar_url
+		FROM replies r
+		LEFT JOIN users u ON r.owner_uid IS NOT NULL AND r.owner_uid = u.uid
+		WHERE r.comment_id = $1::uuid ORDER BY r.created_at ASC
 	`, commentID)
 	if err != nil {
 		return nil, err
@@ -41,9 +44,11 @@ func (r *RepliesRepository) List(ctx context.Context, commentID string) ([]Reply
 	var replies []Reply
 	for rows.Next() {
 		var rep Reply
-		if err := rows.Scan(&rep.ID, &rep.CommentID, &rep.OwnerUID, &rep.Text, &rep.CreatedAt); err != nil {
+		var avatar *string
+		if err := rows.Scan(&rep.ID, &rep.CommentID, &rep.OwnerUID, &rep.Text, &rep.CreatedAt, &avatar); err != nil {
 			return nil, err
 		}
+		rep.OwnerAvatarURL = avatar
 		replies = append(replies, rep)
 	}
 	if replies == nil {
@@ -61,7 +66,17 @@ func (r *RepliesRepository) Create(ctx context.Context, commentID string, ownerU
 	`, commentID, ownerUID, text).Scan(
 		&rep.ID, &rep.CommentID, &rep.OwnerUID, &rep.Text, &rep.CreatedAt,
 	)
-	return rep, err
+	if err != nil {
+		return nil, err
+	}
+	var avatar *string
+	_ = r.db.QueryRow(ctx, `
+		SELECT u.avatar_url FROM replies r
+		LEFT JOIN users u ON r.owner_uid IS NOT NULL AND r.owner_uid = u.uid
+		WHERE r.id = $1::uuid
+	`, rep.ID).Scan(&avatar)
+	rep.OwnerAvatarURL = avatar
+	return rep, nil
 }
 
 // GetCommentOwner returns board_owner_id for a comment.
@@ -213,11 +228,7 @@ func (h *RepliesHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	allowed := boardOwner == callerUID
-	if !allowed && replyOwner != nil && *replyOwner == callerUID {
-		allowed = true
-	}
-	if !allowed {
+	if replyOwner == nil || *replyOwner != callerUID {
 		http.Error(w, "forbidden", http.StatusForbidden)
 		return
 	}

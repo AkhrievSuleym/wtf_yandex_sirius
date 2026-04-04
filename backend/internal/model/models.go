@@ -26,10 +26,11 @@ type User struct {
 }
 
 type Comment struct {
-	ID           string              `json:"id"`
-	BoardOwnerID string              `json:"boardOwnerId"`
-	AuthorID     *string             `json:"authorId"`
-	Text         string              `json:"text"`
+	ID              string              `json:"id"`
+	BoardOwnerID    string              `json:"boardOwnerId"`
+	AuthorID        *string             `json:"authorId"`
+	AuthorAvatarURL *string             `json:"authorAvatarUrl,omitempty"`
+	Text            string              `json:"text"`
 	IsRead       bool                `json:"isRead"`
 	CreatedAt    time.Time           `json:"createdAt"`
 	Reactions    map[string]int      `json:"reactions"`

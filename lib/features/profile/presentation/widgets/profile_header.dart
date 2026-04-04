@@ -8,12 +8,14 @@ class ProfileHeader extends StatelessWidget {
   final ProfileModel profile;
   final VoidCallback? onAvatarTap;
   final Widget? action;
+  final bool avatarEditBadge;
 
   const ProfileHeader({
     super.key,
     required this.profile,
     this.onAvatarTap,
     this.action,
+    this.avatarEditBadge = false,
   });
 
   @override
@@ -31,6 +33,7 @@ class ProfileHeader extends StatelessWidget {
             avatarUrl: profile.avatarUrl,
             size: 88,
             onTap: onAvatarTap,
+            showCameraBadge: avatarEditBadge,
           ),
           const SizedBox(height: 16),
           Text(

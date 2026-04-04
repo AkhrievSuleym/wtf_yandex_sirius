@@ -57,7 +57,8 @@ class MockSearchRepository extends _i1.Mock implements _i2.SearchRepository {
       ) as _i3.Future<String?>);
 
   @override
-  _i3.Future<List<_i5.SearchHistoryItem>> getSearchHistory(String? accountUid) =>
+  _i3.Future<List<_i5.SearchHistoryItem>> getSearchHistory(
+          String? accountUid) =>
       (super.noSuchMethod(
         Invocation.method(
           #getSearchHistory,

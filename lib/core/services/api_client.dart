@@ -28,7 +28,10 @@ class ApiClient {
           handler.next(options);
         },
         onError: (err, handler) {
-          AppLogger.e(_tag, 'HTTP ${err.response?.statusCode} ${err.requestOptions.path}', err);
+          AppLogger.e(
+              _tag,
+              'HTTP ${err.response?.statusCode} ${err.requestOptions.path}',
+              err);
           handler.next(err);
         },
       ),

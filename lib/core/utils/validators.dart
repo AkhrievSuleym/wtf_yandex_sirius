@@ -47,8 +47,16 @@ class Validators {
   static bool _containsProfanity(String text) {
     final lower = text.toLowerCase();
     const banned = [
-      'хуй', 'пизда', 'пиздец', 'ёбаный', 'еблан',
-      'fuck', 'shit', 'bitch', 'cunt', 'nigger',
+      'хуй',
+      'пизда',
+      'пиздец',
+      'ёбаный',
+      'еблан',
+      'fuck',
+      'shit',
+      'bitch',
+      'cunt',
+      'nigger',
     ];
     return banned.any(lower.contains);
   }

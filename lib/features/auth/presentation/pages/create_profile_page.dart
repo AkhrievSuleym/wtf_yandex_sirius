@@ -103,8 +103,7 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Расскажите о себе',
-                    style: theme.textTheme.headlineSmall),
+                Text('Расскажите о себе', style: theme.textTheme.headlineSmall),
                 const SizedBox(height: 8),
                 Text('Ник нельзя будет изменить позже',
                     style: theme.textTheme.bodySmall),

@@ -89,7 +89,8 @@ class _AnonymousSignUpCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.shield_outlined, color: AppColors.primary, size: 32),
+                  const Icon(Icons.shield_outlined,
+                      color: AppColors.primary, size: 32),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(

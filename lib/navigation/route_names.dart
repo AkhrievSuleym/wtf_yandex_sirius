@@ -41,5 +41,6 @@ class RoutePaths {
   static String publicProfileFromSearch(String uid) => '/search/$uid';
   static String sendCommentFromSearch(String uid) => '/search/$uid/comment';
   static String publicProfileFromFavorites(String uid) => '/favorites/$uid';
-  static String sendCommentFromFavorites(String uid) => '/favorites/$uid/comment';
+  static String sendCommentFromFavorites(String uid) =>
+      '/favorites/$uid/comment';
 }

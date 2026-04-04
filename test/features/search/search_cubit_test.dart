@@ -104,8 +104,7 @@ void main() {
     blocTest<SearchCubit, SearchState>(
       'emits [Loading, Empty] when no results',
       build: () {
-        when(mockRepo.searchByUsername('xyz'))
-            .thenAnswer((_) async => []);
+        when(mockRepo.searchByUsername('xyz')).thenAnswer((_) async => []);
         return buildCubit();
       },
       act: (cubit) => cubit.onQueryChanged('xyz'),
@@ -133,8 +132,7 @@ void main() {
     blocTest<SearchCubit, SearchState>(
       'clears query → calls loadHistory',
       build: () {
-        when(mockRepo.getSearchHistory(accountUid))
-            .thenAnswer((_) async => []);
+        when(mockRepo.getSearchHistory(accountUid)).thenAnswer((_) async => []);
         return buildCubit();
       },
       act: (cubit) => cubit.onQueryChanged(''),
