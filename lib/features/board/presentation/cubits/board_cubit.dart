@@ -19,7 +19,8 @@ class BoardCubit extends Cubit<BoardState> {
     _subscription = _boardRepository.watchBoardComments(ownerId).listen(
       (comments) {
         final unread = comments.where((c) => !c.isRead).length;
-        AppLogger.d(_tag, 'board updated: ${comments.length} comments, $unread unread');
+        AppLogger.d(
+            _tag, 'board updated: ${comments.length} comments, $unread unread');
         emit(BoardLoaded(comments: comments, unreadCount: unread));
       },
       onError: (e) {

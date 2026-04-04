@@ -154,9 +154,7 @@ class _ReactionChipState extends State<_ReactionChip>
           curve: Curves.easeOutCubic,
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: widget.isActive
-                ? tint.withValues(alpha: 0.2)
-                : surface,
+            color: widget.isActive ? tint.withValues(alpha: 0.2) : surface,
             border: Border.all(
               color: widget.isActive
                   ? tint.withValues(alpha: 0.65)

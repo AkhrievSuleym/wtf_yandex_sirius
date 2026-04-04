@@ -62,13 +62,19 @@ class WelcomePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                ).animate().fadeIn(duration: 400.ms).scale(begin: const Offset(0.8, 0.8), duration: 400.ms),
+                )
+                    .animate()
+                    .fadeIn(duration: 400.ms)
+                    .scale(begin: const Offset(0.8, 0.8), duration: 400.ms),
                 const SizedBox(height: 32),
                 Text(
                   'What They Feel',
                   style: theme.textTheme.headlineMedium,
                   textAlign: TextAlign.center,
-                ).animate(delay: 200.ms).fadeIn(duration: 300.ms).slideY(begin: 0.2, end: 0, duration: 300.ms),
+                )
+                    .animate(delay: 200.ms)
+                    .fadeIn(duration: 300.ms)
+                    .slideY(begin: 0.2, end: 0, duration: 300.ms),
                 const SizedBox(height: 12),
                 Text(
                   'Анонимные сообщения.\nЧестная обратная связь.',
@@ -76,7 +82,10 @@ class WelcomePage extends StatelessWidget {
                     color: AppColors.textSecondaryLight,
                   ),
                   textAlign: TextAlign.center,
-                ).animate(delay: 350.ms).fadeIn(duration: 300.ms).slideY(begin: 0.2, end: 0, duration: 300.ms),
+                )
+                    .animate(delay: 350.ms)
+                    .fadeIn(duration: 300.ms)
+                    .slideY(begin: 0.2, end: 0, duration: 300.ms),
                 const SizedBox(height: 20),
                 Text(
                   'Если не установить пароль в настройках, при потере устройства или переустановке приложения восстановить аккаунт не получится.',
@@ -85,18 +94,27 @@ class WelcomePage extends StatelessWidget {
                     height: 1.35,
                   ),
                   textAlign: TextAlign.center,
-                ).animate(delay: 420.ms).fadeIn(duration: 300.ms).slideY(begin: 0.15, end: 0, duration: 300.ms),
+                )
+                    .animate(delay: 420.ms)
+                    .fadeIn(duration: 300.ms)
+                    .slideY(begin: 0.15, end: 0, duration: 300.ms),
                 const Spacer(flex: 3),
                 AppButton(
                   label: 'Начать',
                   onPressed: () => context.pushNamed(RouteNames.signUp),
-                ).animate(delay: 500.ms).fadeIn(duration: 300.ms).slideY(begin: 0.3, end: 0, duration: 300.ms),
+                )
+                    .animate(delay: 500.ms)
+                    .fadeIn(duration: 300.ms)
+                    .slideY(begin: 0.3, end: 0, duration: 300.ms),
                 const SizedBox(height: 12),
                 AppButton(
                   label: 'У меня есть аккаунт',
                   isOutlined: true,
                   onPressed: () => context.pushNamed(RouteNames.login),
-                ).animate(delay: 580.ms).fadeIn(duration: 300.ms).slideY(begin: 0.3, end: 0, duration: 300.ms),
+                )
+                    .animate(delay: 580.ms)
+                    .fadeIn(duration: 300.ms)
+                    .slideY(begin: 0.3, end: 0, duration: 300.ms),
                 const SizedBox(height: 32),
               ],
             ),

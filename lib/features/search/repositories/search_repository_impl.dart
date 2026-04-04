@@ -16,7 +16,8 @@ class SearchRepositoryImpl implements SearchRepository {
   final ApiClient _api;
   final SharedPreferences _prefs;
 
-  SearchRepositoryImpl({required ApiClient api, required SharedPreferences prefs})
+  SearchRepositoryImpl(
+      {required ApiClient api, required SharedPreferences prefs})
       : _api = api,
         _prefs = prefs;
 
@@ -40,7 +41,8 @@ class SearchRepositoryImpl implements SearchRepository {
   Future<List<ProfileModel>> searchByUsername(String query) async {
     if (query.isEmpty) return [];
     AppLogger.d(_tag, 'searchByUsername: "$query"');
-    final response = await _api.dio.get('/search', queryParameters: {'q': query});
+    final response =
+        await _api.dio.get('/search', queryParameters: {'q': query});
     return (response.data as List)
         .map((e) => ProfileModel.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -62,8 +64,8 @@ class SearchRepositoryImpl implements SearchRepository {
   Future<List<SearchHistoryItem>> getSearchHistory(String accountUid) async {
     final raw = await _readHistoryRaw(accountUid);
     return raw
-        .map((e) => SearchHistoryItem.fromJson(
-            jsonDecode(e) as Map<String, dynamic>))
+        .map((e) =>
+            SearchHistoryItem.fromJson(jsonDecode(e) as Map<String, dynamic>))
         .toList();
   }
 

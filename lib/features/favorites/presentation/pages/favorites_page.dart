@@ -43,42 +43,44 @@ class _FavoritesPageState extends State<FavoritesPage> {
         child: BlocBuilder<FavoritesCubit, FavoritesState>(
           builder: (context, state) {
             return switch (state) {
-            FavoritesInitial() || FavoritesLoading() => const FavoritesShimmer(),
-            FavoritesError(:final message) => AppErrorWidget(
-                message: message,
-                onRetry: () {
-                  final authState = context.read<AuthCubit>().state;
-                  if (authState is AuthAuthenticated) {
-                    context
-                        .read<FavoritesCubit>()
-                        .subscribeFavorites(authState.user.uid);
-                  }
-                },
-              ),
-            FavoritesLoaded(:final favorites) => favorites.isEmpty
-                ? _EmptyFavorites()
-                : ListView.builder(
-                    itemCount: favorites.length,
-                    itemBuilder: (_, i) {
-                      final profile = favorites[i];
-                      return FavoriteProfileTile(
-                        profile: profile,
-                        onTap: () =>
-                            context.push('/favorites/${profile.uid}'),
-                        onRemove: () {
-                          final authState = context.read<AuthCubit>().state;
-                          if (authState is AuthAuthenticated) {
-                            context
-                                .read<FavoritesCubit>()
-                                .removeFromFavorites(profile.uid);
-                          }
-                        },
-                      )
-                          .animate(delay: Duration(milliseconds: 40 * i))
-                          .fadeIn(duration: 200.ms)
-                          .slideX(begin: 0.05, end: 0, duration: 200.ms);
-                    },
-                  ),
+              FavoritesInitial() ||
+              FavoritesLoading() =>
+                const FavoritesShimmer(),
+              FavoritesError(:final message) => AppErrorWidget(
+                  message: message,
+                  onRetry: () {
+                    final authState = context.read<AuthCubit>().state;
+                    if (authState is AuthAuthenticated) {
+                      context
+                          .read<FavoritesCubit>()
+                          .subscribeFavorites(authState.user.uid);
+                    }
+                  },
+                ),
+              FavoritesLoaded(:final favorites) => favorites.isEmpty
+                  ? _EmptyFavorites()
+                  : ListView.builder(
+                      itemCount: favorites.length,
+                      itemBuilder: (_, i) {
+                        final profile = favorites[i];
+                        return FavoriteProfileTile(
+                          profile: profile,
+                          onTap: () =>
+                              context.push('/favorites/${profile.uid}'),
+                          onRemove: () {
+                            final authState = context.read<AuthCubit>().state;
+                            if (authState is AuthAuthenticated) {
+                              context
+                                  .read<FavoritesCubit>()
+                                  .removeFromFavorites(profile.uid);
+                            }
+                          },
+                        )
+                            .animate(delay: Duration(milliseconds: 40 * i))
+                            .fadeIn(duration: 200.ms)
+                            .slideX(begin: 0.05, end: 0, duration: 200.ms);
+                      },
+                    ),
             };
           },
         ),

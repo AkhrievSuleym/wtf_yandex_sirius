@@ -72,9 +72,9 @@ Future<void> setupDependencies() async {
   );
   getIt.registerFactory<SearchCubit>(
     () => SearchCubit(
-          getIt<SearchRepository>(),
-          getIt<AuthRepository>(),
-        ),
+      getIt<SearchRepository>(),
+      getIt<AuthRepository>(),
+    ),
   );
   getIt.registerLazySingleton<FavoritesCubit>(
     () => FavoritesCubit(getIt<FavoritesRepository>()),

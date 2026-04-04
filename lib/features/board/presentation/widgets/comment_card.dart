@@ -168,11 +168,12 @@ class CommentCard extends StatelessWidget {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.memePeach.withValues(alpha: 0.95),
+                              color:
+                                  AppColors.memePeach.withValues(alpha: 0.95),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color:
-                                    AppColors.memeOrange.withValues(alpha: 0.45),
+                                color: AppColors.memeOrange
+                                    .withValues(alpha: 0.45),
                                 width: 1.25,
                               ),
                             ),

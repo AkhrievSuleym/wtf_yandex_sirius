@@ -24,7 +24,8 @@ class SearchHistoryList extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.history, size: 48, color: AppColors.textSecondaryLight),
+              const Icon(Icons.history,
+                  size: 48, color: AppColors.textSecondaryLight),
               const SizedBox(height: 12),
               Text(
                 'История просмотров пуста',
@@ -79,7 +80,8 @@ class SearchHistoryList extends StatelessWidget {
                         fit: BoxFit.cover,
                       ),
                     )
-                  : const Icon(Icons.person, color: AppColors.primary, size: 20),
+                  : const Icon(Icons.person,
+                      color: AppColors.primary, size: 20),
             ),
             title: Text(item.viewedDisplayName ?? item.query),
             subtitle: item.viewedUsername != null
@@ -91,8 +93,8 @@ class SearchHistoryList extends StatelessWidget {
                     ),
                   )
                 : null,
-            trailing: const Icon(Icons.north_west, size: 16,
-                color: AppColors.textSecondaryLight),
+            trailing: const Icon(Icons.north_west,
+                size: 16, color: AppColors.textSecondaryLight),
           ),
         ),
       ],

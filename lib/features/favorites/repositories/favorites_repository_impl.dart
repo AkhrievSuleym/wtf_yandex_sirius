@@ -54,8 +54,8 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
     required String targetUid,
   }) async {
     AppLogger.d(_tag, 'isFavorite: target=$targetUid');
-    final response = await _api.dio
-        .get('/users/$userId/favorites/$targetUid/check');
+    final response =
+        await _api.dio.get('/users/$userId/favorites/$targetUid/check');
     return response.data['isFavorite'] as bool;
   }
 }

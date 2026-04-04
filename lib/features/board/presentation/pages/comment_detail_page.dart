@@ -94,8 +94,7 @@ class _CommentDetailPageState extends State<CommentDetailPage> {
         '/comments/${widget.commentId}/replies',
         data: {'text': text},
       );
-      final reply =
-          ReplyModel.fromJson(response.data as Map<String, dynamic>);
+      final reply = ReplyModel.fromJson(response.data as Map<String, dynamic>);
       _replyController.clear();
       if (mounted) {
         setState(() => _replies = [..._replies, reply]);
@@ -244,7 +243,8 @@ class _CommentBubble extends StatelessWidget {
 
   Color get _chipBg {
     if (authorId == null) return AppColors.memeYellow.withValues(alpha: 0.92);
-    if (authorId == currentUserId) return AppColors.memeLime.withValues(alpha: 0.88);
+    if (authorId == currentUserId)
+      return AppColors.memeLime.withValues(alpha: 0.88);
     if (authorId == boardOwnerUid) {
       return AppColors.memeViolet.withValues(alpha: 0.35);
     }
@@ -389,7 +389,8 @@ class _ReplyBubble extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.memeViolet.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.ink.withValues(alpha: 0.45), width: 2),
+                border: Border.all(
+                    color: AppColors.ink.withValues(alpha: 0.45), width: 2),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -486,7 +487,8 @@ class _ReplyInput extends StatelessWidget {
                   filled: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
-                    borderSide: const BorderSide(color: AppColors.ink, width: 2.5),
+                    borderSide:
+                        const BorderSide(color: AppColors.ink, width: 2.5),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
@@ -497,7 +499,8 @@ class _ReplyInput extends StatelessWidget {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 3),
+                    borderSide:
+                        const BorderSide(color: AppColors.primary, width: 3),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,

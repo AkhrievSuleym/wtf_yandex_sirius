@@ -65,7 +65,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
                 onRetry: () {
                   final authState = context.read<AuthCubit>().state;
                   if (authState is AuthAuthenticated) {
-                    context.read<ProfileCubit>().loadProfile(authState.user.uid);
+                    context
+                        .read<ProfileCubit>()
+                        .loadProfile(authState.user.uid);
                   }
                 },
               ),
@@ -78,7 +80,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
                     ProfileHeader(
                       profile: profile,
                       avatarEditBadge: true,
-                      onAvatarTap: state is ProfileUpdating ? null : _pickAvatar,
+                      onAvatarTap:
+                          state is ProfileUpdating ? null : _pickAvatar,
                     ),
                     if (state is ProfileUpdating)
                       const Padding(
@@ -109,8 +112,7 @@ class _EditSection extends StatefulWidget {
 class _EditSectionState extends State<_EditSection> {
   late final _displayNameController =
       TextEditingController(text: widget.profile.displayName);
-  late final _bioController =
-      TextEditingController(text: widget.profile.bio);
+  late final _bioController = TextEditingController(text: widget.profile.bio);
   final _formKey = GlobalKey<FormState>();
 
   @override

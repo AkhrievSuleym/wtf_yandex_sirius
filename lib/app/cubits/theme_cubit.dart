@@ -7,8 +7,7 @@ class ThemeCubit extends Cubit<AppVisualTheme> {
 
   final SharedPreferences _prefs;
 
-  ThemeCubit(this._prefs)
-      : super(_load(_prefs));
+  ThemeCubit(this._prefs) : super(_load(_prefs));
 
   static AppVisualTheme _load(SharedPreferences prefs) {
     final saved = prefs.getString(_key);

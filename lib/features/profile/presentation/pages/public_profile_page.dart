@@ -40,8 +40,7 @@ class _PublicProfilePageState extends State<PublicProfilePage> {
   }
 
   Future<void> _checkFavorite() async {
-    final result =
-        await context.read<FavoritesCubit>().isFavorite(widget.uid);
+    final result = await context.read<FavoritesCubit>().isFavorite(widget.uid);
     if (mounted) setState(() => _isFavorite = result);
   }
 
@@ -54,9 +53,7 @@ class _PublicProfilePageState extends State<PublicProfilePage> {
     if (_isFavorite) {
       await context.read<FavoritesCubit>().removeFromFavorites(widget.uid);
     } else {
-      await context
-          .read<FavoritesCubit>()
-          .addToFavorites(profileState.profile);
+      await context.read<FavoritesCubit>().addToFavorites(profileState.profile);
     }
 
     if (mounted) {
@@ -97,7 +94,8 @@ class _PublicProfilePageState extends State<PublicProfilePage> {
       ),
       body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, profileState) {
-          if (profileState is ProfileLoading || profileState is ProfileInitial) {
+          if (profileState is ProfileLoading ||
+              profileState is ProfileInitial) {
             return const ProfileHeaderShimmer();
           }
           if (profileState is ProfileError) {
@@ -124,7 +122,8 @@ class _PublicProfilePageState extends State<PublicProfilePage> {
               builder: (context, boardState) {
                 return switch (boardState) {
                   BoardLoading() || BoardInitial() => const LoadingIndicator(),
-                  BoardError(:final message) => AppErrorWidget(message: message),
+                  BoardError(:final message) =>
+                    AppErrorWidget(message: message),
                   BoardLoaded(:final comments) => comments.isEmpty
                       ? const Center(child: Text('Пока нет сообщений'))
                       : ListView.builder(
@@ -146,7 +145,7 @@ class _PublicProfilePageState extends State<PublicProfilePage> {
                                 context.read<ProfileCubit>().loadProfile(
                                       widget.uid,
                                       silent: true,
-                                );
+                                    );
                               },
                               onDelete: currentUserId.isNotEmpty &&
                                       comment.authorId == currentUserId

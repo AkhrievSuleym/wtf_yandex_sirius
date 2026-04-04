@@ -55,8 +55,8 @@ class BoardRepositoryImpl implements BoardRepository {
         client?.close(force: true);
         client = HttpClient();
         final token = _api.token ?? '';
-        final uri = Uri.parse(
-            '${ApiConstants.baseUrl}/comments/board/$ownerId/stream');
+        final uri =
+            Uri.parse('${ApiConstants.baseUrl}/comments/board/$ownerId/stream');
         final req = await client!.getUrl(uri);
         req.headers.set('Authorization', 'Bearer $token');
         req.headers.set('Accept', 'text/event-stream');

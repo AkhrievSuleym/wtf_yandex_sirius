@@ -21,7 +21,8 @@ class ShimmerBox extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Shimmer.fromColors(
       baseColor: isDark ? const Color(0xFF2A2A3E) : AppColors.shimmerBase,
-      highlightColor: isDark ? const Color(0xFF3A3A5E) : AppColors.shimmerHighlight,
+      highlightColor:
+          isDark ? const Color(0xFF3A3A5E) : AppColors.shimmerHighlight,
       child: Container(
         width: width,
         height: height,
@@ -66,7 +67,8 @@ class CommentCardShimmer extends StatelessWidget {
                 5,
                 (i) => Padding(
                   padding: EdgeInsets.only(right: i < 4 ? 6 : 0),
-                  child: const ShimmerBox(width: 48, height: 28, borderRadius: 20),
+                  child:
+                      const ShimmerBox(width: 48, height: 28, borderRadius: 20),
                 ),
               ),
             ),
@@ -187,7 +189,8 @@ class ProfileHeaderShimmer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Center(child: ShimmerBox(width: 88, height: 88, borderRadius: 44)),
+          const Center(
+              child: ShimmerBox(width: 88, height: 88, borderRadius: 44)),
           const SizedBox(height: 16),
           const Center(child: ShimmerBox(width: 140, height: 20)),
           const SizedBox(height: 8),

@@ -35,7 +35,8 @@ class _BoardPageState extends State<BoardPage> {
       AppLogger.d(_tag, 'initState: subscribing uid=${authState.user.uid}');
       context.read<BoardCubit>().subscribeToBoard(authState.user.uid);
     } else {
-      AppLogger.d(_tag, 'initState: auth not ready (${authState.runtimeType}), will wait');
+      AppLogger.d(_tag,
+          'initState: auth not ready (${authState.runtimeType}), will wait');
     }
   }
 
@@ -49,120 +50,117 @@ class _BoardPageState extends State<BoardPage> {
   @override
   Widget build(BuildContext context) {
     final authState = context.watch<AuthCubit>().state;
-    final username = authState is AuthAuthenticated
-        ? authState.user.username
-        : '';
-    final userId = authState is AuthAuthenticated
-        ? authState.user.uid
-        : '';
+    final username =
+        authState is AuthAuthenticated ? authState.user.username : '';
+    final userId = authState is AuthAuthenticated ? authState.user.uid : '';
 
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, authState) {
         if (authState is AuthAuthenticated) {
-          AppLogger.d(_tag, 'auth resolved, subscribing uid=${authState.user.uid}');
+          AppLogger.d(
+              _tag, 'auth resolved, subscribing uid=${authState.user.uid}');
           context.read<BoardCubit>().subscribeToBoard(authState.user.uid);
         }
       },
       child: Scaffold(
-      appBar: AppBar(
-        title: const Text('Моя доска'),
-        actions: [
-          BlocBuilder<BoardCubit, BoardState>(
-            builder: (context, state) {
-              final unread =
-                  state is BoardLoaded ? state.unreadCount : 0;
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.share_outlined),
-                    onPressed: () => _share(username),
-                    tooltip: 'Поделиться профилем',
-                  ),
-                  if (unread > 0)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: const BoxDecoration(
-                          color: AppColors.unreadBadge,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          unread > 99 ? '99+' : '$unread',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
+        appBar: AppBar(
+          title: const Text('Моя доска'),
+          actions: [
+            BlocBuilder<BoardCubit, BoardState>(
+              builder: (context, state) {
+                final unread = state is BoardLoaded ? state.unreadCount : 0;
+                return Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.share_outlined),
+                      onPressed: () => _share(username),
+                      tooltip: 'Поделиться профилем',
+                    ),
+                    if (unread > 0)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: const BoxDecoration(
+                            color: AppColors.unreadBadge,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            unread > 99 ? '99+' : '$unread',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-      body: BlocBuilder<BoardCubit, BoardState>(
-        builder: (context, state) {
-          return switch (state) {
-            BoardInitial() || BoardLoading() => const BoardShimmer(),
-            BoardError(:final message) => AppErrorWidget(
-                message: message,
-                onRetry: () {
-                  if (userId.isNotEmpty) {
-                    context.read<BoardCubit>().subscribeToBoard(userId);
-                  }
-                },
-              ),
-            BoardLoaded(:final comments) => comments.isEmpty
-                ? EmptyBoard(onShare: () => _share(username))
-                : RefreshIndicator(
-                    onRefresh: () async {
-                      if (userId.isNotEmpty) {
-                        context.read<BoardCubit>().subscribeToBoard(userId);
-                      }
-                    },
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      itemCount: comments.length,
-                      itemBuilder: (context, index) {
-                        final comment = comments[index];
-                        return CommentCard(
-                          key: ValueKey(comment.id),
-                          comment: comment,
-                          currentUserId: userId,
-                          isBoardOwnerView: true,
-                          onToggleReaction: (key) async {
-                            await context.read<BoardCubit>().toggleReaction(
-                                  comment.id,
-                                  key,
-                                  userId,
-                                );
-                            if (!context.mounted) return;
-                            if (userId.isNotEmpty) {
-                              context.read<ProfileCubit>().loadProfile(
-                                    userId,
-                                    silent: true,
-                                  );
-                            }
-                          },
-                          onDelete: userId.isNotEmpty &&
-                                  comment.authorId == userId
-                              ? () => context
-                                  .read<BoardCubit>()
-                                  .deleteComment(comment.id)
-                              : null,
-                        );
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+        body: BlocBuilder<BoardCubit, BoardState>(
+          builder: (context, state) {
+            return switch (state) {
+              BoardInitial() || BoardLoading() => const BoardShimmer(),
+              BoardError(:final message) => AppErrorWidget(
+                  message: message,
+                  onRetry: () {
+                    if (userId.isNotEmpty) {
+                      context.read<BoardCubit>().subscribeToBoard(userId);
+                    }
+                  },
+                ),
+              BoardLoaded(:final comments) => comments.isEmpty
+                  ? EmptyBoard(onShare: () => _share(username))
+                  : RefreshIndicator(
+                      onRefresh: () async {
+                        if (userId.isNotEmpty) {
+                          context.read<BoardCubit>().subscribeToBoard(userId);
+                        }
                       },
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        itemCount: comments.length,
+                        itemBuilder: (context, index) {
+                          final comment = comments[index];
+                          return CommentCard(
+                            key: ValueKey(comment.id),
+                            comment: comment,
+                            currentUserId: userId,
+                            isBoardOwnerView: true,
+                            onToggleReaction: (key) async {
+                              await context.read<BoardCubit>().toggleReaction(
+                                    comment.id,
+                                    key,
+                                    userId,
+                                  );
+                              if (!context.mounted) return;
+                              if (userId.isNotEmpty) {
+                                context.read<ProfileCubit>().loadProfile(
+                                      userId,
+                                      silent: true,
+                                    );
+                              }
+                            },
+                            onDelete:
+                                userId.isNotEmpty && comment.authorId == userId
+                                    ? () => context
+                                        .read<BoardCubit>()
+                                        .deleteComment(comment.id)
+                                    : null,
+                          );
+                        },
+                      ),
                     ),
-                  ),
-          };
-        },
+            };
+          },
+        ),
       ),
-    ),
     );
   }
 }

@@ -58,8 +58,8 @@ class _SettingsPageState extends State<SettingsPage> {
               if (isUpdating) const LinearProgressIndicator(),
               SwitchListTile(
                 title: const Text('Публичная доска'),
-                subtitle: const Text(
-                    'Все могут видеть сообщения на вашей доске'),
+                subtitle:
+                    const Text('Все могут видеть сообщения на вашей доске'),
                 value: isPublic,
                 activeThumbColor: theme.colorScheme.primary,
                 onChanged: isUpdating
@@ -93,8 +93,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
                 title: const Text('Изменить пароль'),
-                onTap: () =>
-                    context.push('/profile/settings/change-password'),
+                onTap: () => context.push('/profile/settings/change-password'),
               ),
               const Divider(),
               ListTile(
@@ -106,8 +105,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 onTap: () => _confirmSignOut(context),
               ),
               ListTile(
-                leading: const Icon(Icons.delete_forever,
-                    color: AppColors.error),
+                leading:
+                    const Icon(Icons.delete_forever, color: AppColors.error),
                 title: const Text(
                   'Удалить аккаунт',
                   style: TextStyle(color: AppColors.error),
@@ -150,8 +149,7 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Удалить аккаунт?'),
-        content:
-            const Text('Все ваши данные будут удалены безвозвратно.'),
+        content: const Text('Все ваши данные будут удалены безвозвратно.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
@@ -162,8 +160,7 @@ class _SettingsPageState extends State<SettingsPage> {
               Navigator.pop(dialogContext);
               context.read<AuthCubit>().deleteAccount();
             },
-            style:
-                TextButton.styleFrom(foregroundColor: AppColors.error),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
             child: const Text('Удалить'),
           ),
         ],
@@ -250,20 +247,20 @@ class _ThemeCard extends StatelessWidget {
 
   // Mini palette swatches for each theme
   List<Color> get _swatches => switch (visualTheme) {
-    AppVisualTheme.meme => [
-        AppColors.primary,
-        AppColors.secondary,
-        AppColors.memeLime,
-        AppColors.memeYellow,
-      ],
-    // Gothic is always dark (dungeon aesthetic)
-    AppVisualTheme.gothic => [
-        const Color(0xFFC0182A), // blood crimson
-        const Color(0xFF9E7C3A), // tarnished gold
-        const Color(0xFF1A1A22), // dungeon stone
-        const Color(0xFF0D0D12), // abyss
-      ],
-  };
+        AppVisualTheme.meme => [
+            AppColors.primary,
+            AppColors.secondary,
+            AppColors.memeLime,
+            AppColors.memeYellow,
+          ],
+        // Gothic is always dark (dungeon aesthetic)
+        AppVisualTheme.gothic => [
+            const Color(0xFFC0182A), // blood crimson
+            const Color(0xFF9E7C3A), // tarnished gold
+            const Color(0xFF1A1A22), // dungeon stone
+            const Color(0xFF0D0D12), // abyss
+          ],
+      };
 
   @override
   Widget build(BuildContext context) {
