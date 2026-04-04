@@ -24,12 +24,13 @@ import '../features/profile/presentation/pages/settings_page.dart';
 import '../features/search/presentation/cubits/search_cubit.dart';
 import '../features/search/presentation/pages/search_page.dart';
 import '../features/deep_link/presentation/pages/deep_link_page.dart';
+import '../features/splash/presentation/pages/splash_page.dart';
 import 'route_names.dart';
 import 'shell_route.dart';
 
 GoRouter createRouter(AuthCubit authCubit) {
   return GoRouter(
-    initialLocation: '/board',
+    initialLocation: '/splash',
     refreshListenable: _AuthStateListenable(authCubit),
     redirect: (context, state) {
       final uri = state.uri;
@@ -44,6 +45,9 @@ GoRouter createRouter(AuthCubit authCubit) {
 
       final authState = authCubit.state;
       final path = state.uri.path;
+
+      // Let splash screen show without redirect
+      if (path == '/splash') return null;
 
       final isOnAuth = path == '/welcome' ||
           path == '/sign-up' ||
@@ -69,6 +73,12 @@ GoRouter createRouter(AuthCubit authCubit) {
       return null;
     },
     routes: [
+      // Splash screen
+      GoRoute(
+        path: '/splash',
+        name: RouteNames.splash,
+        builder: (_, __) => const SplashPage(),
+      ),
       // Deep link: wtf://u/{username}
       GoRoute(
         path: '/u/:username',
