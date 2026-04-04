@@ -43,3 +43,14 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Xcode build services
+# ios/Flutter/Debug.xcconfig
+# ios/Flutter/Release.xcconfig
+
+ios/Podfile
+
+# Firebase sensitive data
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
