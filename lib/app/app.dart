@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../core/utils/app_logger.dart';
 import '../features/auth/presentation/cubits/auth_cubit.dart';
 import '../navigation/app_router.dart';
@@ -21,12 +22,14 @@ class _AppState extends State<App> {
 
   late final AuthCubit _authCubit;
   late final ThemeCubit _themeCubit;
+  late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
     _authCubit = getIt<AuthCubit>();
     _themeCubit = getIt<ThemeCubit>();
+    _router = createRouter(_authCubit);
     AppLogger.i(_tag, 'checkAuthStatus');
     _authCubit.checkAuthStatus();
   }
@@ -53,18 +56,13 @@ class _AppState extends State<App> {
               ? GothicTheme.dark
               : AppTheme.dark;
 
-          return Builder(
-            builder: (context) {
-              final router = createRouter(_authCubit);
-              return MaterialApp.router(
-                title: 'WTF',
-                theme: light,
-                darkTheme: dark,
-                themeMode: ThemeMode.system,
-                routerConfig: router,
-                debugShowCheckedModeBanner: false,
-              );
-            },
+          return MaterialApp.router(
+            title: 'WTF',
+            theme: light,
+            darkTheme: dark,
+            themeMode: ThemeMode.system,
+            routerConfig: _router,
+            debugShowCheckedModeBanner: false,
           );
         },
       ),
