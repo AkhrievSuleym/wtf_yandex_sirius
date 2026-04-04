@@ -243,8 +243,9 @@ class _CommentBubble extends StatelessWidget {
 
   Color get _chipBg {
     if (authorId == null) return AppColors.memeYellow.withValues(alpha: 0.92);
-    if (authorId == currentUserId)
+    if (authorId == currentUserId) {
       return AppColors.memeLime.withValues(alpha: 0.88);
+    }
     if (authorId == boardOwnerUid) {
       return AppColors.memeViolet.withValues(alpha: 0.35);
     }

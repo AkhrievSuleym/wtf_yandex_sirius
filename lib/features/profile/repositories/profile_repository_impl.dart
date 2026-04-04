@@ -22,7 +22,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     if (_avatarCacheBuster != null && m.avatarUrl != null) {
       final u = m.avatarUrl!;
       m = m.copyWith(
-        avatarUrl: '${u}${u.contains('?') ? '&' : '?'}v=$_avatarCacheBuster',
+        avatarUrl: '$u${u.contains('?') ? '&' : '?'}v=$_avatarCacheBuster',
       );
     }
     return m;
