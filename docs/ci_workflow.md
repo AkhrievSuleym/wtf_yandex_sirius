@@ -9,14 +9,14 @@ flowchart TD
     MAIN["fa:fa-code-branch Main"] --> MAIN_CI
 
     subgraph PUSH_CI["Push CI — ранние предупреждения"]
-        C1("1. dart format") --> C1Q(["Формат верен?"])
-        C1Q -->|Да| C2("2. flutter pub get")
-        C1Q -.->|Нет| C1W["fa:fa-triangle-exclamation Предупреждение: форматирование"]
+        C1("1. flutter pub get") --> C1Q(["Зависимости разрешены?"])
+        C1Q -->|Да| C2("2. dart format")
+        C1Q -.->|Нет| C1W["fa:fa-triangle-exclamation Предупреждение: зависимости"]
         C1W ~~~ C2
 
-        C2 --> C2Q(["Зависимости разрешены?"])
-        C2Q -->|Да| C3("3. flutter analyze")
-        C2Q -.->|Нет| C2W["fa:fa-triangle-exclamation Предупреждение: зависимости"]
+        C2 --> C2Q(["Формат верен?"])
+        C2Q -->|Да| C3("3. flutter analyze --no-pub")
+        C2Q -.->|Нет| C2W["fa:fa-triangle-exclamation Предупреждение: форматирование"]
         C2W ~~~ C3
 
         C3 --> C3Q(["Анализ без ошибок?"])
