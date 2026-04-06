@@ -26,7 +26,6 @@ void main() {
     displayName: 'Alice',
     bio: '',
     commentCount: 0,
-    isPublic: true,
   );
 
   final historyItem = SearchHistoryItem(

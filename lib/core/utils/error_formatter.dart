@@ -16,7 +16,8 @@ String formatError(Object error) {
         if (status == 401) return 'Сессия истекла. Войдите снова.';
         if (status == 403) return 'Нет доступа.';
         if (status == 404) return 'Не найдено.';
-        if (status != null && status >= 500) return 'Ошибка сервера. Попробуйте позже.';
+        if (status != null && status >= 500)
+          return 'Ошибка сервера. Попробуйте позже.';
         return 'Что-то пошло не так. Попробуйте ещё раз.';
       case DioExceptionType.cancel:
         return 'Запрос отменён.';
