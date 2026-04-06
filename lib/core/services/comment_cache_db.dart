@@ -49,8 +49,9 @@ class CommentCacheDb {
 
   Future<void> saveComments(String ownerId, List<CommentModel> comments) async {
     final db = await _database;
-    final trimmed =
-        comments.length > _cacheSize ? comments.sublist(0, _cacheSize) : comments;
+    final trimmed = comments.length > _cacheSize
+        ? comments.sublist(0, _cacheSize)
+        : comments;
 
     await db.transaction((txn) async {
       await txn.delete(_table, where: 'owner_id = ?', whereArgs: [ownerId]);
@@ -84,8 +85,7 @@ class CommentCacheDb {
         'text': c.text,
         'createdAt': c.createdAt.toIso8601String(),
         'reactions': c.reactions,
-        'reactedBy':
-            c.reactedBy.map((k, v) => MapEntry(k, v)),
+        'reactedBy': c.reactedBy.map((k, v) => MapEntry(k, v)),
         'isRead': c.isRead,
         'replyCount': c.replyCount,
       };

@@ -4,8 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ConnectivityService {
   final Connectivity _connectivity;
-  final StreamController<bool> _controller =
-      StreamController<bool>.broadcast();
+  final StreamController<bool> _controller = StreamController<bool>.broadcast();
 
   bool _isOnline = true;
 
