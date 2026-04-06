@@ -10,3 +10,6 @@ analyzer:
 linter:
   rules:
     avoid_print: true
+
+formatter:
+  trailing_commas: preserve
