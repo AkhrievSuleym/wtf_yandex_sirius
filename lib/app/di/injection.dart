@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/api_client.dart';
 import '../../core/services/comment_cache_db.dart';
 import '../../core/services/connectivity_service.dart';
-import '../cubits/theme_cubit.dart';
 import '../../features/auth/presentation/cubits/auth_cubit.dart';
 import '../../features/auth/repositories/auth_repository.dart';
 import '../../features/auth/repositories/auth_repository_impl.dart';
@@ -40,9 +39,6 @@ Future<void> setupDependencies() async {
   getIt.registerLazySingleton<ConnectivityService>(
     () => ConnectivityService(Connectivity()),
   );
-
-  // Theme
-  getIt.registerLazySingleton<ThemeCubit>(() => ThemeCubit(prefs));
 
   getIt.registerLazySingleton<CommentCacheDb>(() => CommentCacheDb());
 
