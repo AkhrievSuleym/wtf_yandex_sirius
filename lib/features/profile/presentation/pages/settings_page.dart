@@ -46,31 +46,11 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(title: const Text('Настройки')),
       body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
-          final isPublic = switch (state) {
-            ProfileLoaded(:final profile) => profile.isPublic,
-            ProfileUpdating(:final profile) => profile.isPublic,
-            _ => true,
-          };
           final isUpdating = state is ProfileUpdating;
 
           return ListView(
             children: [
               if (isUpdating) const LinearProgressIndicator(),
-              SwitchListTile(
-                title: const Text('Публичная доска'),
-                subtitle:
-                    const Text('Все могут видеть сообщения на вашей доске'),
-                value: isPublic,
-                activeThumbColor: theme.colorScheme.primary,
-                onChanged: isUpdating
-                    ? null
-                    : (value) {
-                        context
-                            .read<ProfileCubit>()
-                            .updateProfile(isPublic: value);
-                      },
-              ),
-              const Divider(),
               // Visual theme picker
               BlocBuilder<ThemeCubit, AppVisualTheme>(
                 builder: (context, current) {

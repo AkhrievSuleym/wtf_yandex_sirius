@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
@@ -23,10 +25,28 @@ class BoardPage extends StatefulWidget {
 class _BoardPageState extends State<BoardPage> {
   static const _tag = 'BoardPage';
 
+  StreamSubscription? _toastSub;
+
   @override
   void initState() {
     super.initState();
     _trySubscribe();
+    _toastSub = context.read<BoardCubit>().toastStream.listen((msg) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _toastSub?.cancel();
+    super.dispose();
   }
 
   void _trySubscribe() {

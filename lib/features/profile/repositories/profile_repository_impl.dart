@@ -38,7 +38,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<void> updateProfile({
     String? displayName,
-    bool? isPublic,
     String? bio,
     String? avatarPath,
   }) async {
@@ -55,16 +54,14 @@ class ProfileRepositoryImpl implements ProfileRepository {
         ),
       });
       await _api.dio.post('/users/$uid/avatar', data: form);
-      // Bump version so CachedNetworkImage fetches the new file.
       _avatarCacheBuster = '${DateTime.now().millisecondsSinceEpoch}';
       AppLogger.d(_tag, 'updateProfile: avatar buster=$_avatarCacheBuster');
     }
 
-    if (displayName != null || bio != null || isPublic != null) {
+    if (displayName != null || bio != null) {
       await _api.dio.put('/users/$uid', data: {
         if (displayName != null) 'displayName': displayName.trim(),
         if (bio != null) 'bio': bio.trim(),
-        if (isPublic != null) 'isPublic': isPublic,
       });
     }
 

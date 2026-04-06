@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../../core/utils/error_formatter.dart';
 import '../../../auth/repositories/auth_repository.dart';
 import '../../../profile/models/profile_model.dart';
 import '../../models/search_history_item.dart';
@@ -68,7 +69,7 @@ class SearchCubit extends Cubit<SearchState> {
       }
     } catch (e) {
       AppLogger.e(_tag, 'search failed', e);
-      emit(SearchError(e.toString()));
+      emit(SearchError(formatError(e)));
     }
   }
 

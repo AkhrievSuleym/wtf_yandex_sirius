@@ -4,7 +4,6 @@ class UserModel {
   final String displayName;
   final String bio;
   final String? avatarUrl;
-  final bool isPublic;
   final DateTime createdAt;
   final DateTime updatedAt;
   final int commentCount;
@@ -15,7 +14,6 @@ class UserModel {
     required this.displayName,
     required this.bio,
     this.avatarUrl,
-    required this.isPublic,
     required this.createdAt,
     required this.updatedAt,
     required this.commentCount,
@@ -28,7 +26,6 @@ class UserModel {
       username: '',
       displayName: '',
       bio: '',
-      isPublic: true,
       createdAt: now,
       updatedAt: now,
       commentCount: 0,
@@ -41,7 +38,6 @@ class UserModel {
     String? displayName,
     String? bio,
     String? avatarUrl,
-    bool? isPublic,
     DateTime? createdAt,
     DateTime? updatedAt,
     int? commentCount,
@@ -52,7 +48,6 @@ class UserModel {
       displayName: displayName ?? this.displayName,
       bio: bio ?? this.bio,
       avatarUrl: avatarUrl ?? this.avatarUrl,
-      isPublic: isPublic ?? this.isPublic,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       commentCount: commentCount ?? this.commentCount,
@@ -66,7 +61,6 @@ class UserModel {
       displayName: json['displayName'] as String? ?? '',
       bio: json['bio'] as String? ?? '',
       avatarUrl: json['avatarUrl'] as String?,
-      isPublic: json['isPublic'] as bool? ?? true,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       commentCount: json['commentCount'] as int? ?? 0,
