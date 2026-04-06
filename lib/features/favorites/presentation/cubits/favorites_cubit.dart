@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../../core/utils/error_formatter.dart';
 import '../../../profile/models/profile_model.dart';
 import '../../repositories/favorites_repository.dart';
 import 'favorites_state.dart';
@@ -30,7 +31,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       },
       onError: (e) {
         AppLogger.e(_tag, 'favorites stream error', e);
-        emit(FavoritesError(e.toString()));
+        emit(FavoritesError(formatError(e)));
       },
     );
   }
@@ -43,7 +44,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       emit(FavoritesLoaded(list));
     } catch (e) {
       AppLogger.e(_tag, '_reload failed', e);
-      emit(FavoritesError(e.toString()));
+      emit(FavoritesError(formatError(e)));
     }
   }
 
@@ -60,7 +61,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       await _reload();
     } catch (e) {
       AppLogger.e(_tag, 'addToFavorites failed', e);
-      emit(FavoritesError(e.toString()));
+      emit(FavoritesError(formatError(e)));
     }
   }
 
@@ -75,7 +76,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       await _reload();
     } catch (e) {
       AppLogger.e(_tag, 'removeFromFavorites failed', e);
-      emit(FavoritesError(e.toString()));
+      emit(FavoritesError(formatError(e)));
     }
   }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../../core/utils/error_formatter.dart';
 import '../../repositories/board_repository.dart';
 import 'board_state.dart';
 
@@ -10,11 +11,17 @@ class BoardCubit extends Cubit<BoardState> {
   final BoardRepository _boardRepository;
   StreamSubscription? _subscription;
 
+  final StreamController<String> _toastController =
+      StreamController<String>.broadcast();
+  Stream<String> get toastStream => _toastController.stream;
+
   BoardCubit(this._boardRepository) : super(const BoardInitial());
 
   void subscribeToBoard(String ownerId) {
     AppLogger.i(_tag, 'subscribeToBoard: ownerId=$ownerId');
-    emit(const BoardLoading());
+    if (state is! BoardLoaded) {
+      emit(const BoardLoading());
+    }
     _subscription?.cancel();
     _subscription = _boardRepository.watchBoardComments(ownerId).listen(
       (comments) {
@@ -25,7 +32,9 @@ class BoardCubit extends Cubit<BoardState> {
       },
       onError: (e) {
         AppLogger.e(_tag, 'board stream error', e);
-        emit(BoardError(e.toString()));
+        if (state is! BoardLoaded) {
+          emit(BoardError(formatError(e)));
+        }
       },
     );
   }
@@ -36,7 +45,7 @@ class BoardCubit extends Cubit<BoardState> {
       await _boardRepository.deleteComment(commentId);
     } catch (e) {
       AppLogger.e(_tag, 'deleteComment failed', e);
-      emit(BoardError(e.toString()));
+      _toastController.add(formatError(e));
     }
   }
 
@@ -89,7 +98,10 @@ class BoardCubit extends Cubit<BoardState> {
       );
     } catch (e) {
       AppLogger.e(_tag, 'toggleReaction failed, rolling back', e);
-      emit(BoardError(e.toString()));
+      _toastController.add(formatError(e));
+      if (state is BoardLoaded) {
+        subscribeToBoard((state as BoardLoaded).comments.first.boardOwnerId);
+      }
     }
   }
 
@@ -97,6 +109,7 @@ class BoardCubit extends Cubit<BoardState> {
   Future<void> close() {
     AppLogger.d(_tag, 'close');
     _subscription?.cancel();
+    _toastController.close();
     return super.close();
   }
 }

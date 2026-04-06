@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/api_constants.dart';
 import '../utils/app_logger.dart';
@@ -6,12 +9,17 @@ import '../utils/app_logger.dart';
 class ApiClient {
   static const _tokenKey = 'auth_token';
   static const _uidKey = 'auth_uid';
+  static const _userCacheKey = 'cached_user_json';
   static const _tag = 'ApiClient';
 
   final Dio dio;
+  final FlutterSecureStorage _storage;
   final SharedPreferences _prefs;
 
-  ApiClient(this._prefs)
+  String? _cachedToken;
+  String? _cachedUid;
+
+  ApiClient(this._storage, this._prefs)
       : dio = Dio(
           BaseOptions(
             baseUrl: ApiConstants.baseUrl,
@@ -23,7 +31,7 @@ class ApiClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          final t = token;
+          final t = _cachedToken;
           if (t != null) options.headers['Authorization'] = 'Bearer $t';
           handler.next(options);
         },
@@ -38,17 +46,38 @@ class ApiClient {
     );
   }
 
-  String? get token => _prefs.getString(_tokenKey);
-  String? get currentUid => _prefs.getString(_uidKey);
-  bool get isLoggedIn => token != null;
+  String? get token => _cachedToken;
+  String? get currentUid => _cachedUid;
+  bool get isLoggedIn => _cachedToken != null;
+
+  Future<void> init() async {
+    _cachedToken = await _storage.read(key: _tokenKey);
+    _cachedUid = await _storage.read(key: _uidKey);
+    AppLogger.d(_tag, 'init: isLoggedIn=$isLoggedIn');
+  }
 
   Future<void> saveCredentials(String uid, String token) async {
-    await _prefs.setString(_tokenKey, token);
-    await _prefs.setString(_uidKey, uid);
+    await _storage.write(key: _tokenKey, value: token);
+    await _storage.write(key: _uidKey, value: uid);
+    _cachedToken = token;
+    _cachedUid = uid;
   }
 
   Future<void> clearCredentials() async {
-    await _prefs.remove(_tokenKey);
-    await _prefs.remove(_uidKey);
+    await _storage.delete(key: _tokenKey);
+    await _storage.delete(key: _uidKey);
+    await _prefs.remove(_userCacheKey);
+    _cachedToken = null;
+    _cachedUid = null;
+  }
+
+  Future<void> cacheUserJson(Map<String, dynamic> json) async {
+    await _prefs.setString(_userCacheKey, jsonEncode(json));
+  }
+
+  Map<String, dynamic>? getCachedUserJson() {
+    final raw = _prefs.getString(_userCacheKey);
+    if (raw == null) return null;
+    return jsonDecode(raw) as Map<String, dynamic>;
   }
 }

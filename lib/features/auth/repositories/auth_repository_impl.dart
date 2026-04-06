@@ -27,15 +27,22 @@ class AuthRepositoryImpl implements AuthRepository {
     AppLogger.d(_tag, 'getCurrentUser: uid=$uid');
     try {
       final response = await _api.dio.get('/users/$uid');
-      return UserModel.fromJson(response.data as Map<String, dynamic>);
+      final json = response.data as Map<String, dynamic>;
+      await _api.cacheUserJson(json);
+      return UserModel.fromJson(json);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        AppLogger.w(
-            _tag, 'getCurrentUser: user not found, clearing credentials');
+        AppLogger.w(_tag, 'getCurrentUser: user not found, clearing credentials');
         await _api.clearCredentials();
         return null;
       }
-      AppLogger.e(_tag, 'getCurrentUser failed', e);
+      AppLogger.w(_tag, 'getCurrentUser: no network, trying local cache');
+      final cached = _api.getCachedUserJson();
+      if (cached != null) {
+        AppLogger.i(_tag, 'getCurrentUser: serving from local cache');
+        return UserModel.fromJson(cached);
+      }
+      AppLogger.e(_tag, 'getCurrentUser failed, no cache', e);
       rethrow;
     }
   }

@@ -4,12 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../app/di/injection.dart';
 import '../app/theme/app_colors.dart';
+import '../core/services/connectivity_service.dart';
 import '../features/auth/presentation/cubits/auth_cubit.dart';
 import '../features/auth/presentation/cubits/auth_state.dart';
 import '../features/profile/presentation/cubits/profile_cubit.dart';
 
-class ScaffoldWithBottomNav extends StatelessWidget {
+class ScaffoldWithBottomNav extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
 
   const ScaffoldWithBottomNav({
@@ -17,6 +19,11 @@ class ScaffoldWithBottomNav extends StatelessWidget {
     required this.navigationShell,
   });
 
+  @override
+  State<ScaffoldWithBottomNav> createState() => _ScaffoldWithBottomNavState();
+}
+
+class _ScaffoldWithBottomNavState extends State<ScaffoldWithBottomNav> {
   static const _tabs = <_TabSpec>[
     _TabSpec(Icons.dashboard_outlined, Icons.dashboard_rounded, 'Доска'),
     _TabSpec(Icons.search_rounded, Icons.search_rounded, 'Поиск'),
@@ -24,17 +31,35 @@ class ScaffoldWithBottomNav extends StatelessWidget {
     _TabSpec(Icons.person_outline, Icons.person, 'Профиль'),
   ];
 
+  late final ConnectivityService _connectivity;
+  bool _isOnline = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _connectivity = getIt<ConnectivityService>();
+    _isOnline = _connectivity.isOnline;
+    _connectivity.onStatusChange.listen((online) {
+      if (mounted) setState(() => _isOnline = online);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: navigationShell,
+      body: Column(
+        children: [
+          _OfflineBanner(isOnline: _isOnline),
+          Expanded(child: widget.navigationShell),
+        ],
+      ),
       bottomNavigationBar: _MemeBottomNavigationBar(
-        currentIndex: navigationShell.currentIndex,
+        currentIndex: widget.navigationShell.currentIndex,
         tabs: _tabs,
         onSelect: (index) {
-          navigationShell.goBranch(
+          widget.navigationShell.goBranch(
             index,
-            initialLocation: index == navigationShell.currentIndex,
+            initialLocation: index == widget.navigationShell.currentIndex,
           );
           if (index == ShellBranches.profile) {
             final auth = context.read<AuthCubit>().state;
@@ -44,6 +69,47 @@ class ScaffoldWithBottomNav extends StatelessWidget {
           }
         },
       ),
+    );
+  }
+}
+
+class _OfflineBanner extends StatelessWidget {
+  final bool isOnline;
+
+  const _OfflineBanner({required this.isOnline});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      child: isOnline
+          ? const SizedBox.shrink()
+          : Container(
+              width: double.infinity,
+              color: const Color(0xFF2C2C2E),
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + 8,
+                bottom: 8,
+                left: 16,
+                right: 16,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.wifi_off_rounded,
+                      size: 14, color: Colors.white70),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Нет подключения — показываем кеш',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 }

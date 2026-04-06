@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../../core/utils/error_formatter.dart';
 import '../../repositories/comment_repository.dart';
 import 'comment_state.dart';
 
@@ -25,7 +26,7 @@ class CommentCubit extends Cubit<CommentState> {
       emit(const CommentSuccess());
     } catch (e) {
       AppLogger.e(_tag, 'sendComment failed', e);
-      emit(CommentError(e.toString()));
+      emit(CommentError(formatError(e)));
     }
   }
 
