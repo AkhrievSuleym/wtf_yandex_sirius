@@ -32,7 +32,8 @@ class AuthRepositoryImpl implements AuthRepository {
       return UserModel.fromJson(json);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        AppLogger.w(_tag, 'getCurrentUser: user not found, clearing credentials');
+        AppLogger.w(
+            _tag, 'getCurrentUser: user not found, clearing credentials');
         await _api.clearCredentials();
         return null;
       }

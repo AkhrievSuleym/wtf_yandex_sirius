@@ -90,7 +90,8 @@ class BoardRepositoryImpl implements BoardRepository {
     Future<void> startWithCache() async {
       final cached = await _cacheDb.loadComments(ownerId);
       if (cached.isNotEmpty && !controller.isClosed) {
-        AppLogger.d(_tag, 'watchBoardComments: serving ${cached.length} from db cache');
+        AppLogger.d(
+            _tag, 'watchBoardComments: serving ${cached.length} from db cache');
         controller.add(cached);
       }
       fetchAndEmit();
