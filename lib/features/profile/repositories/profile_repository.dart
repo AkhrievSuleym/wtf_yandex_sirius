@@ -5,7 +5,6 @@ abstract class ProfileRepository {
   Future<void> updateProfile({
     String? displayName,
     String? bio,
-    bool? isPublic,
     String? avatarPath,
   });
   Future<bool> isUsernameAvailable(String username);

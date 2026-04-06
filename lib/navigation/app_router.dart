@@ -143,8 +143,8 @@ GoRouter createRouter(AuthCubit authCubit) {
               GoRoute(
                 path: '/board',
                 name: RouteNames.board,
-                builder: (_, __) => BlocProvider(
-                  create: (_) => getIt<BoardCubit>(),
+                builder: (_, __) => BlocProvider.value(
+                  value: getIt<BoardCubit>(instanceName: 'myBoard'),
                   child: const BoardPage(),
                 ),
               ),

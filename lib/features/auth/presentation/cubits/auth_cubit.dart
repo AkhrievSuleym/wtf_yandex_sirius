@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../../core/utils/error_formatter.dart';
 import '../../repositories/auth_repository.dart';
 import 'auth_state.dart';
 
@@ -31,7 +32,7 @@ class AuthCubit extends Cubit<AuthState> {
       },
       onError: (e) {
         AppLogger.e(_tag, 'authStateChanges error', e);
-        emit(AuthError(e.toString()));
+        emit(AuthError(formatError(e)));
       },
     );
   }
@@ -50,10 +51,7 @@ class AuthCubit extends Cubit<AuthState> {
       }
     } catch (e) {
       AppLogger.e(_tag, 'signUpAnonymous failed', e);
-      final message = e is Exception
-          ? e.toString().replaceFirst('Exception: ', '')
-          : e.toString();
-      emit(AuthError(message));
+      emit(AuthError(formatError(e)));
     }
   }
 
@@ -70,14 +68,10 @@ class AuthCubit extends Cubit<AuthState> {
         displayName: displayName,
         bio: bio,
       );
-      // Re-fetch user to transition to Authenticated
       checkAuthStatus();
     } catch (e) {
       AppLogger.e(_tag, 'createProfile failed', e);
-      final message = e is Exception
-          ? e.toString().replaceFirst('Exception: ', '')
-          : e.toString();
-      emit(AuthError(message));
+      emit(AuthError(formatError(e)));
     }
   }
 
@@ -96,10 +90,7 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthAuthenticated(user));
     } catch (e) {
       AppLogger.e(_tag, 'loginWithPassword failed', e);
-      final message = e is Exception
-          ? e.toString().replaceFirst('Exception: ', '')
-          : e.toString();
-      emit(AuthError(message));
+      emit(AuthError(formatError(e)));
     }
   }
 
@@ -131,7 +122,7 @@ class AuthCubit extends Cubit<AuthState> {
       emit(const AuthUnauthenticated());
     } catch (e) {
       AppLogger.e(_tag, 'deleteAccount failed', e);
-      emit(AuthError(e.toString()));
+      emit(AuthError(formatError(e)));
     }
   }
 

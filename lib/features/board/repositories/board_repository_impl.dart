@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/constants/api_constants.dart';
 import '../../../core/services/api_client.dart';
+import '../../../core/services/comment_cache_db.dart';
 import '../../../core/utils/app_logger.dart';
 import '../models/comment_model.dart';
 import 'board_repository.dart';
@@ -14,8 +15,9 @@ class BoardRepositoryImpl implements BoardRepository {
   static const _tag = 'BoardRepository';
 
   final ApiClient _api;
+  final CommentCacheDb _cacheDb;
 
-  BoardRepositoryImpl(this._api);
+  BoardRepositoryImpl(this._api, this._cacheDb);
 
   @override
   Stream<List<CommentModel>> watchBoardComments(String ownerId) {
@@ -32,11 +34,11 @@ class BoardRepositoryImpl implements BoardRepository {
         final list = (response.data as List)
             .map((e) => CommentModel.fromJson(e as Map<String, dynamic>))
             .toList();
+        await _cacheDb.saveComments(ownerId, list);
         AppLogger.d(_tag, 'watchBoardComments: ${list.length} comments');
         if (!controller.isClosed) controller.add(list);
       } on DioException catch (e) {
-        AppLogger.e(_tag, 'fetch failed', e);
-        if (!controller.isClosed) controller.addError(e);
+        AppLogger.e(_tag, 'fetch failed — no network, keeping cache', e);
       }
     }
 
@@ -44,9 +46,7 @@ class BoardRepositoryImpl implements BoardRepository {
       void scheduleReconnect() {
         sseReconnect?.cancel();
         sseReconnect = Timer(const Duration(seconds: 2), () {
-          if (!controller.isClosed) {
-            connectSSE();
-          }
+          if (!controller.isClosed) connectSSE();
         });
       }
 
@@ -87,8 +87,17 @@ class BoardRepositoryImpl implements BoardRepository {
       }
     }
 
-    fetchAndEmit();
-    connectSSE();
+    Future<void> startWithCache() async {
+      final cached = await _cacheDb.loadComments(ownerId);
+      if (cached.isNotEmpty && !controller.isClosed) {
+        AppLogger.d(_tag, 'watchBoardComments: serving ${cached.length} from db cache');
+        controller.add(cached);
+      }
+      fetchAndEmit();
+      connectSSE();
+    }
+
+    startWithCache();
 
     controller.onCancel = () {
       sseReconnect?.cancel();
@@ -103,6 +112,7 @@ class BoardRepositoryImpl implements BoardRepository {
   Future<void> deleteComment(String commentId) async {
     AppLogger.i(_tag, 'deleteComment: id=$commentId');
     await _api.dio.delete('/comments/$commentId');
+    await _cacheDb.deleteComment(commentId);
   }
 
   @override

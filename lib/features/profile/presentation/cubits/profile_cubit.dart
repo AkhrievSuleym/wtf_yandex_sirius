@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/app_logger.dart';
+import '../../../../core/utils/error_formatter.dart';
 import '../../repositories/profile_repository.dart';
 import 'profile_state.dart';
 
@@ -24,14 +25,13 @@ class ProfileCubit extends Cubit<ProfileState> {
       emit(ProfileLoaded(profile));
     } catch (e) {
       AppLogger.e(_tag, 'loadProfile failed', e);
-      emit(ProfileError(e.toString()));
+      emit(ProfileError(formatError(e)));
     }
   }
 
   Future<void> updateProfile({
     String? displayName,
     String? bio,
-    bool? isPublic,
     String? avatarPath,
   }) async {
     final current = state;
@@ -43,7 +43,6 @@ class ProfileCubit extends Cubit<ProfileState> {
       await _profileRepository.updateProfile(
         displayName: displayName,
         bio: bio,
-        isPublic: isPublic,
         avatarPath: avatarPath,
       );
       final updated = await _profileRepository.getProfile(current.profile.uid);
@@ -51,7 +50,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       emit(ProfileLoaded(updated));
     } catch (e) {
       AppLogger.e(_tag, 'updateProfile failed', e);
-      emit(ProfileError(e.toString()));
+      emit(ProfileError(formatError(e)));
     }
   }
 

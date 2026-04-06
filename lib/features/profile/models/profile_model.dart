@@ -8,7 +8,6 @@ class ProfileModel {
   final String bio;
   final String? avatarUrl;
   final int commentCount;
-  final bool isPublic;
   final Map<String, int> reactionStats;
 
   ProfileModel({
@@ -18,7 +17,6 @@ class ProfileModel {
     required this.bio,
     this.avatarUrl,
     required this.commentCount,
-    required this.isPublic,
     Map<String, int>? reactionStats,
   }) : reactionStats = reactionStats ?? _emptyReactionStats();
 
@@ -49,7 +47,6 @@ class ProfileModel {
     String? bio,
     String? avatarUrl,
     int? commentCount,
-    bool? isPublic,
     Map<String, int>? reactionStats,
   }) {
     return ProfileModel(
@@ -59,7 +56,6 @@ class ProfileModel {
       bio: bio ?? this.bio,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       commentCount: commentCount ?? this.commentCount,
-      isPublic: isPublic ?? this.isPublic,
       reactionStats: reactionStats ?? Map<String, int>.from(this.reactionStats),
     );
   }
@@ -71,7 +67,6 @@ class ProfileModel {
         bio: json['bio'] as String? ?? '',
         avatarUrl: resolveAvatarUrl(json['avatarUrl'] as String?),
         commentCount: json['commentCount'] as int? ?? 0,
-        isPublic: json['isPublic'] as bool? ?? true,
         reactionStats: _parseReactionStats(json['reactionStats']),
       );
 
@@ -82,7 +77,6 @@ class ProfileModel {
         'bio': bio,
         'avatarUrl': avatarUrl,
         'commentCount': commentCount,
-        'isPublic': isPublic,
         'reactionStats': reactionStats,
       };
 }

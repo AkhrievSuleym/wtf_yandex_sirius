@@ -1,8 +1,11 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/services/api_client.dart';
-import '../cubits/theme_cubit.dart';
+import '../../core/services/comment_cache_db.dart';
+import '../../core/services/connectivity_service.dart';
 import '../../features/auth/presentation/cubits/auth_cubit.dart';
 import '../../features/auth/repositories/auth_repository.dart';
 import '../../features/auth/repositories/auth_repository_impl.dart';
@@ -28,18 +31,23 @@ Future<void> setupDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(prefs);
 
-  // Theme
-  getIt.registerLazySingleton<ThemeCubit>(() => ThemeCubit(prefs));
+  const secureStorage = FlutterSecureStorage();
+  final apiClient = ApiClient(secureStorage, prefs);
+  await apiClient.init();
+  getIt.registerSingleton<ApiClient>(apiClient);
 
-  // Core
-  getIt.registerLazySingleton<ApiClient>(() => ApiClient(prefs));
+  getIt.registerLazySingleton<ConnectivityService>(
+    () => ConnectivityService(Connectivity()),
+  );
+
+  getIt.registerLazySingleton<CommentCacheDb>(() => CommentCacheDb());
 
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(getIt<ApiClient>()),
   );
   getIt.registerLazySingleton<BoardRepository>(
-    () => BoardRepositoryImpl(getIt<ApiClient>()),
+    () => BoardRepositoryImpl(getIt<ApiClient>(), getIt<CommentCacheDb>()),
   );
   getIt.registerLazySingleton<CommentRepository>(
     () => CommentRepositoryImpl(getIt<ApiClient>()),
@@ -60,6 +68,10 @@ Future<void> setupDependencies() async {
   // Cubits (factory — новый экземпляр на каждый вызов)
   getIt.registerFactory<AuthCubit>(
     () => AuthCubit(getIt<AuthRepository>()),
+  );
+  getIt.registerLazySingleton<BoardCubit>(
+    () => BoardCubit(getIt<BoardRepository>()),
+    instanceName: 'myBoard',
   );
   getIt.registerFactory<BoardCubit>(
     () => BoardCubit(getIt<BoardRepository>()),

@@ -4,11 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../core/utils/app_logger.dart';
 import '../features/auth/presentation/cubits/auth_cubit.dart';
 import '../navigation/app_router.dart';
-import 'cubits/theme_cubit.dart';
 import 'di/injection.dart';
 import 'theme/app_theme.dart';
-import 'theme/app_visual_theme.dart';
-import 'theme/gothic_theme.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -21,14 +18,12 @@ class _AppState extends State<App> {
   static const _tag = 'App';
 
   late final AuthCubit _authCubit;
-  late final ThemeCubit _themeCubit;
   late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
     _authCubit = getIt<AuthCubit>();
-    _themeCubit = getIt<ThemeCubit>();
     _router = createRouter(_authCubit);
     AppLogger.i(_tag, 'checkAuthStatus');
     _authCubit.checkAuthStatus();
@@ -42,29 +37,15 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider.value(value: _authCubit),
-        BlocProvider.value(value: _themeCubit),
-      ],
-      child: BlocBuilder<ThemeCubit, AppVisualTheme>(
-        builder: (context, visualTheme) {
-          final light = visualTheme == AppVisualTheme.gothic
-              ? GothicTheme.light
-              : AppTheme.light;
-          final dark = visualTheme == AppVisualTheme.gothic
-              ? GothicTheme.dark
-              : AppTheme.dark;
-
-          return MaterialApp.router(
-            title: 'WTF',
-            theme: light,
-            darkTheme: dark,
-            themeMode: ThemeMode.system,
-            routerConfig: _router,
-            debugShowCheckedModeBanner: false,
-          );
-        },
+    return BlocProvider.value(
+      value: _authCubit,
+      child: MaterialApp.router(
+        title: 'WTF',
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        themeMode: ThemeMode.system,
+        routerConfig: _router,
+        debugShowCheckedModeBanner: false,
       ),
     );
   }
