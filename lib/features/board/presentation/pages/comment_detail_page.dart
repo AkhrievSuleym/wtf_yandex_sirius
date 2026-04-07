@@ -185,7 +185,7 @@ class _CommentDetailPageState extends State<CommentDetailPage> {
                       child: Text(
                         'Ответов пока нет — напишите ниже',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondaryLight,
+                          color: AppColors.textSecondaryDark,
                         ),
                       ),
                     ),
@@ -244,7 +244,7 @@ class _CommentBubble extends StatelessWidget {
   Color get _chipBg {
     if (authorId == null) return AppColors.memeYellow.withValues(alpha: 0.92);
     if (authorId == currentUserId) {
-      return AppColors.memeLime.withValues(alpha: 0.88);
+      return AppColors.primaryDark.withValues(alpha: 0.22);
     }
     if (authorId == boardOwnerUid) {
       return AppColors.memeViolet.withValues(alpha: 0.35);
@@ -255,7 +255,7 @@ class _CommentBubble extends StatelessWidget {
   Color get _border {
     if (authorId == null) return AppColors.ink.withValues(alpha: 0.12);
     if (authorId == currentUserId) {
-      return AppColors.memeLime.withValues(alpha: 0.65);
+      return AppColors.primaryDark.withValues(alpha: 0.15);
     }
     if (authorId == boardOwnerUid) {
       return AppColors.memeViolet.withValues(alpha: 0.55);
@@ -417,7 +417,7 @@ class _ReplyBubble extends StatelessWidget {
                           child: const Icon(
                             Icons.close,
                             size: 16,
-                            color: AppColors.textSecondaryLight,
+                            color: AppColors.textSecondaryDark,
                           ),
                         ),
                       ],
@@ -526,7 +526,7 @@ class _ReplyInput extends StatelessWidget {
                     onPressed: onSend,
                     icon: const Icon(Icons.send_rounded, size: 20),
                     style: IconButton.styleFrom(
-                      backgroundColor: AppColors.memeLime,
+                      backgroundColor: AppColors.primaryDark,
                       foregroundColor: AppColors.ink,
                       side: const BorderSide(color: AppColors.ink, width: 2.5),
                     ),

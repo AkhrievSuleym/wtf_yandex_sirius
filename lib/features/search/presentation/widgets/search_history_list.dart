@@ -25,12 +25,12 @@ class SearchHistoryList extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(Icons.history,
-                  size: 48, color: AppColors.textSecondaryLight),
+                  size: 48, color: AppColors.textSecondaryDark),
               const SizedBox(height: 12),
               Text(
                 'История просмотров пуста',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondaryLight,
+                      color: AppColors.textSecondaryDark,
                     ),
               ),
             ],
@@ -50,14 +50,14 @@ class SearchHistoryList extends StatelessWidget {
                 'Недавние',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondaryLight,
+                      color: AppColors.textSecondaryDark,
                     ),
               ),
               const Spacer(),
               TextButton(
                 onPressed: onClear,
                 style: TextButton.styleFrom(
-                  foregroundColor: AppColors.textSecondaryLight,
+                  foregroundColor: AppColors.textSecondaryDark,
                   padding: EdgeInsets.zero,
                 ),
                 child: const Text('Очистить'),
@@ -94,7 +94,7 @@ class SearchHistoryList extends StatelessWidget {
                   )
                 : null,
             trailing: const Icon(Icons.north_west,
-                size: 16, color: AppColors.textSecondaryLight),
+                size: 16, color: AppColors.textSecondaryDark),
           ),
         ),
       ],

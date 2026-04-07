@@ -43,7 +43,7 @@ class _AppState extends State<App> {
         title: 'WTF',
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.system,
+        themeMode: ThemeMode.dark,
         routerConfig: _router,
         debugShowCheckedModeBanner: false,
       ),

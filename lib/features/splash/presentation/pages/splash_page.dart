@@ -110,7 +110,7 @@ class _SplashPageState extends State<SplashPage> {
                   fontWeight: FontWeight.w500,
                   color: isDark
                       ? AppColors.textSecondaryDark
-                      : AppColors.textSecondaryLight,
+                      : AppColors.textSecondaryDark,
                   letterSpacing: 2,
                 ),
               )

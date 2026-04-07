@@ -27,7 +27,7 @@ class EmptyBoard extends StatelessWidget {
             Text(
               'Поделитесь ссылкой на профиль, чтобы получить первые анонимные сообщения!',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondaryLight,
+                color: AppColors.textSecondaryDark,
               ),
               textAlign: TextAlign.center,
             ),

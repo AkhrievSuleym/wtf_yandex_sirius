@@ -119,7 +119,7 @@ class _SearchBar extends StatelessWidget {
       decoration: InputDecoration(
         hintText: 'Поиск по никнейму...',
         prefixIcon:
-            const Icon(Icons.search, color: AppColors.textSecondaryLight),
+            const Icon(Icons.search, color: AppColors.textSecondaryDark),
         suffixIcon: ValueListenableBuilder(
           valueListenable: controller,
           builder: (_, value, __) => value.text.isNotEmpty
@@ -163,7 +163,7 @@ class _EmptyResults extends StatelessWidget {
               'По запросу «$query» ничего не найдено.\nПроверьте никнейм.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondaryLight,
+                    color: AppColors.textSecondaryDark,
                   ),
             ),
           ],
