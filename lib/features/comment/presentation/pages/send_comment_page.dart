@@ -127,7 +127,7 @@ class _SendCommentPageState extends State<SendCommentPage> {
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: _charCount > AppConstants.commentMaxLength
                             ? AppColors.error
-                            : AppColors.textSecondaryLight,
+                            : AppColors.textSecondaryDark,
                       ),
                     ),
                   ),

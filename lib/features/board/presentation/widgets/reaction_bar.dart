@@ -201,7 +201,7 @@ class _ReactionChipState extends State<_ReactionChip>
                           ? tint
                           : Theme.of(context).brightness == Brightness.dark
                               ? AppColors.textSecondaryDark
-                              : AppColors.textSecondaryLight,
+                              : AppColors.textSecondaryDark,
                     ),
                   ),
                 ),
