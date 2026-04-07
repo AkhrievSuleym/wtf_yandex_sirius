@@ -197,7 +197,7 @@ class _MemeTabButtonState extends State<_MemeTabButton> {
     final cs = theme.colorScheme;
     final muted = theme.brightness == Brightness.dark
         ? AppColors.textSecondaryDark
-        : AppColors.textSecondaryLight;
+        : AppColors.textSecondaryDark;
     final iconData =
         widget.selected ? widget.spec.activeIcon : widget.spec.icon;
     final fg = widget.selected ? cs.primary : muted;

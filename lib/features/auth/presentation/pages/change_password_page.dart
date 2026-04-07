@@ -73,7 +73,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 Text(
                   'Установите пароль, чтобы не потерять аккаунт после выхода.',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondaryLight,
+                    color: AppColors.textSecondaryDark,
                   ),
                 ),
                 const SizedBox(height: 32),

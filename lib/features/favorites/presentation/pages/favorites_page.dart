@@ -109,7 +109,7 @@ class _EmptyFavorites extends StatelessWidget {
               'Добавляйте профили в избранное\nдля быстрого доступа',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondaryLight,
+                    color: AppColors.textSecondaryDark,
                   ),
             ),
           ],

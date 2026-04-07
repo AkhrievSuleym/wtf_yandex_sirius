@@ -23,7 +23,7 @@ class ProfileHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final secondary = theme.brightness == Brightness.dark
         ? AppColors.textSecondaryDark
-        : AppColors.textSecondaryLight;
+        : AppColors.textSecondaryDark;
 
     return Padding(
       padding: const EdgeInsets.all(20),

@@ -29,7 +29,7 @@ class AppTheme {
         appBarBg: AppColors.backgroundDark,
         appBarFg: AppColors.textPrimaryDark,
         inputFill: AppColors.surfaceDark,
-        dividerBorder: AppColors.primaryDark,
+        dividerBorder: AppColors.secondary,
         navBg: AppColors.surfaceDark,
       );
 
@@ -58,7 +58,7 @@ class AppTheme {
       onPrimary: Colors.white,
       secondary: secondary,
       onSecondary: AppColors.ink,
-      tertiary: AppColors.memeLime,
+      tertiary: AppColors.memeViolet,
       onTertiary: AppColors.ink,
       surface: surface,
       onSurface: onSurface,
@@ -83,8 +83,8 @@ class AppTheme {
     final borderRadius = BorderRadius.circular(18);
     final stickerSide = BorderSide(
       color: isLight
-          ? AppColors.ink.withValues(alpha: 0.14)
-          : AppColors.primaryDark.withValues(alpha: 0.35),
+          ? AppColors.primary.withValues(alpha: 0.18)
+          : AppColors.primaryDark.withValues(alpha: 0.30),
       width: 1.5,
     );
 
@@ -142,15 +142,11 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           elevation: 0,
           shadowColor: Colors.transparent,
-          backgroundColor: primary,
+          backgroundColor: isLight ? AppColors.primary : AppColors.primaryDark,
           foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 54),
           shape: RoundedRectangleBorder(
             borderRadius: borderRadius,
-            side: BorderSide(
-              color: isLight ? AppColors.ink : AppColors.memeYellow,
-              width: 2.5,
-            ),
           ),
           textStyle: GoogleFonts.fredoka(
             fontSize: 17,
@@ -160,9 +156,14 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: primary,
+          foregroundColor: isLight ? AppColors.primary : AppColors.primaryDark,
           minimumSize: const Size(double.infinity, 54),
-          side: stickerSide,
+          side: BorderSide(
+            color: isLight
+                ? AppColors.primary.withValues(alpha: 0.5)
+                : AppColors.primaryDark.withValues(alpha: 0.5),
+            width: 1.5,
+          ),
           shape: RoundedRectangleBorder(borderRadius: borderRadius),
           textStyle: GoogleFonts.fredoka(
             fontSize: 17,
@@ -172,7 +173,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: primary,
+          foregroundColor: isLight ? AppColors.primary : AppColors.primaryDark,
           textStyle: GoogleFonts.fredoka(fontWeight: FontWeight.w600),
         ),
       ),
@@ -194,12 +195,12 @@ class AppTheme {
         elevation: 0,
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: AppColors.memeLime,
-        foregroundColor: AppColors.ink,
+        backgroundColor:
+            isLight ? AppColors.primary : AppColors.primaryDark,
+        foregroundColor: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.ink, width: 2.5),
         ),
       ),
       textTheme: textTheme.copyWith(

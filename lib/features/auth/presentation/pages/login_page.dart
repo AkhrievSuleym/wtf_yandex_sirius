@@ -67,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
                   Text(
                     'Введите никнейм и пароль от вашего аккаунта',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondaryLight,
+                      color: AppColors.textSecondaryDark,
                     ),
                   ),
                   const SizedBox(height: 40),

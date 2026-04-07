@@ -49,7 +49,7 @@ class SignUpPage extends StatelessWidget {
                 Text(
                   'Вход анонимный — без email и телефона. Пароль можно задать в настройках, иначе при потере устройства аккаунт не восстановить.',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondaryLight,
+                    color: AppColors.textSecondaryDark,
                   ),
                 ),
                 const Spacer(),

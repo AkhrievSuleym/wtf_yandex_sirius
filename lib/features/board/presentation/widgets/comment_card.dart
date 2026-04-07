@@ -53,7 +53,7 @@ class CommentCard extends StatelessWidget {
       case _CommentKind.anonymous:
         return AppColors.memeYellow.withValues(alpha: 0.9);
       case _CommentKind.mine:
-        return AppColors.memeLime.withValues(alpha: 0.88);
+        return AppColors.primaryDark.withValues(alpha: 0.22);
       case _CommentKind.boardOwnerAuthor:
         return AppColors.memeViolet.withValues(alpha: 0.35);
       case _CommentKind.other:
@@ -66,7 +66,7 @@ class CommentCard extends StatelessWidget {
       case _CommentKind.anonymous:
         return AppColors.ink.withValues(alpha: 0.1);
       case _CommentKind.mine:
-        return AppColors.memeLime.withValues(alpha: 0.65);
+        return AppColors.primaryDark.withValues(alpha: 0.15);
       case _CommentKind.boardOwnerAuthor:
         return AppColors.memeViolet.withValues(alpha: 0.55);
       case _CommentKind.other:
@@ -169,10 +169,10 @@ class CommentCard extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color:
-                                  AppColors.memePeach.withValues(alpha: 0.95),
+                                  AppColors.secondary.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: AppColors.memeOrange
+                                color: AppColors.secondary
                                     .withValues(alpha: 0.45),
                                 width: 1.25,
                               ),
@@ -227,7 +227,7 @@ class CommentCard extends StatelessWidget {
                         Text(
                           '${comment.replyCount}',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondaryLight,
+                            color: AppColors.textSecondaryDark,
                           ),
                         ),
                       ],
@@ -251,7 +251,7 @@ class _DeleteButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       icon: const Icon(Icons.delete_outline, size: 18),
-      color: AppColors.textSecondaryLight,
+      color: AppColors.textSecondaryDark,
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
       tooltip: 'Удалить',
