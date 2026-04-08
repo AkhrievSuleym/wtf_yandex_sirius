@@ -56,7 +56,9 @@ class WelcomePage extends StatelessWidget {
                 Text(
                   'Анонимные сообщения.\nЧестная обратная связь.',
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondaryDark,
+                    color: theme.brightness == Brightness.dark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textSecondaryLight,
                   ),
                   textAlign: TextAlign.center,
                 )

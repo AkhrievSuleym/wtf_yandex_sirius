@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../app/theme/theme_service.dart';
 import '../../core/services/api_client.dart';
 import '../../core/services/comment_cache_db.dart';
 import '../../core/services/connectivity_service.dart';
@@ -30,6 +31,9 @@ final getIt = GetIt.instance;
 Future<void> setupDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(prefs);
+
+  // Register ThemeService
+  getIt.registerSingleton<ThemeService>(ThemeService(prefs));
 
   const secureStorage = FlutterSecureStorage();
   final apiClient = ApiClient(secureStorage, prefs);
