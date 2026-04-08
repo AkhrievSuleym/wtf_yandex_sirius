@@ -6,6 +6,7 @@ import '../features/auth/presentation/cubits/auth_cubit.dart';
 import '../navigation/app_router.dart';
 import 'di/injection.dart';
 import 'theme/app_theme.dart';
+import 'theme/theme_service.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -19,12 +20,14 @@ class _AppState extends State<App> {
 
   late final AuthCubit _authCubit;
   late final GoRouter _router;
+  late final ThemeService _themeService;
 
   @override
   void initState() {
     super.initState();
     _authCubit = getIt<AuthCubit>();
     _router = createRouter(_authCubit);
+    _themeService = getIt<ThemeService>();
     AppLogger.i(_tag, 'checkAuthStatus');
     _authCubit.checkAuthStatus();
   }
@@ -39,13 +42,18 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _authCubit,
-      child: MaterialApp.router(
-        title: 'WTF',
-        theme: AppTheme.light,
-        darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.dark,
-        routerConfig: _router,
-        debugShowCheckedModeBanner: false,
+      child: ValueListenableBuilder<ThemeMode>(
+        valueListenable: _themeService.themeModeNotifier,
+        builder: (context, themeMode, child) {
+          return MaterialApp.router(
+            title: 'WTF',
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            themeMode: themeMode,
+            routerConfig: _router,
+            debugShowCheckedModeBanner: false,
+          );
+        },
       ),
     );
   }

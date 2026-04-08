@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../app/di/injection.dart';
+import '../../../../app/theme/theme_service.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../auth/presentation/cubits/auth_cubit.dart';
 import '../../../auth/presentation/cubits/auth_state.dart';
@@ -37,6 +39,26 @@ class _SettingsPageState extends State<SettingsPage> {
           return ListView(
             children: [
               if (isUpdating) const LinearProgressIndicator(),
+              ValueListenableBuilder<ThemeMode>(
+                valueListenable: getIt<ThemeService>().themeModeNotifier,
+                builder: (context, themeMode, child) {
+                  return SwitchListTile(
+                    secondary: Icon(
+                      themeMode == ThemeMode.dark
+                          ? Icons.dark_mode
+                          : Icons.light_mode,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                    title: const Text('Темная тема'),
+                    value: themeMode == ThemeMode.dark,
+                    onChanged: (value) {
+                      getIt<ThemeService>().saveThemeMode(
+                        value ? ThemeMode.dark : ThemeMode.light,
+                      );
+                    },
+                  );
+                },
+              ),
               ListTile(
                 leading: Icon(
                   Icons.lock_outline,

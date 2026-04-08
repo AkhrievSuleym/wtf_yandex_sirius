@@ -313,10 +313,12 @@ class _CommentBubble extends StatelessWidget {
                       ),
                       child: Text(
                         _label,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.ink,
+                          color: theme.brightness == Brightness.dark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.ink,
                         ),
                       ),
                     ),
@@ -402,7 +404,9 @@ class _ReplyBubble extends StatelessWidget {
                         _authorLabel,
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: AppColors.ink,
+                          color: theme.brightness == Brightness.dark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.ink,
                         ),
                       ),
                       const Spacer(),
