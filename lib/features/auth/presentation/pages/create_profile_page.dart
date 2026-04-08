@@ -23,6 +23,7 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
 
   bool _isCheckingUsername = false;
   bool? _isUsernameAvailable;
+  String? _usernameValidationError;
   Timer? _debounce;
 
   @override
@@ -51,13 +52,19 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
   }
 
   Future<void> _checkUsername(String username) async {
-    if (Validators.username(username) != null) {
+    final validationError = Validators.username(username);
+    if (validationError != null) {
       setState(() {
         _isCheckingUsername = false;
-        _isUsernameAvailable = false;
+        _isUsernameAvailable = null;
+        _usernameValidationError = validationError;
       });
       return;
     }
+
+    // Clear validation error if username is valid
+    setState(() => _usernameValidationError = null);
+
     try {
       final available = await context
           .read<AuthCubit>()
@@ -118,7 +125,18 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                   maxLength: AppConstants.usernameMaxLength,
                   suffix: _buildUsernameSuffix(),
                 ),
-                if (_isUsernameAvailable == false && !_isCheckingUsername)
+                if (_usernameValidationError != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4, left: 4),
+                    child: Text(
+                      _usernameValidationError!,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: AppColors.error),
+                    ),
+                  ),
+                if (_isUsernameAvailable == false &&
+                    _usernameValidationError == null &&
+                    !_isCheckingUsername)
                   Padding(
                     padding: const EdgeInsets.only(top: 4, left: 4),
                     child: Text('Никнейм занят',
