@@ -89,38 +89,45 @@ class _OfflineBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      alignment: Alignment.topCenter,
-      child: isOnline
-          ? SizedBox(key: const ValueKey('online'), width: double.infinity)
-          : Container(
-              key: const ValueKey('offline'),
-              width: double.infinity,
-              color: const Color(0xFF2C2C2E),
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + 8,
-                bottom: 8,
-                left: 16,
-                right: 16,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.wifi_off_rounded,
-                      size: 14, color: Colors.white70),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Нет подключения — показываем кеш',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.white70,
-                          fontWeight: FontWeight.w500,
-                        ),
-                  ),
-                ],
+    final topPadding = MediaQuery.of(context).padding.top;
+    return GestureDetector(
+      onTap: () => getIt<ConnectivityService>().forceCheck(),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        clipBehavior: Clip.hardEdge,
+        height: isOnline ? 0.0 : topPadding + 32.0,
+        width: double.infinity,
+        color: const Color(0xFF2C2C2E),
+        child: isOnline
+            ? const SizedBox.shrink()
+          : SingleChildScrollView(
+              physics: const NeverScrollableScrollPhysics(),
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: topPadding + 8.0,
+                  bottom: 8.0,
+                  left: 16.0,
+                  right: 16.0,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.wifi_off_rounded,
+                        size: 14, color: Colors.white70),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Нет подключения — показываем кеш',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                  ],
+                ),
               ),
             ),
+      ),
     );
   }
 }
