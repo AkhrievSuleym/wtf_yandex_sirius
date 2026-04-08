@@ -132,7 +132,7 @@ GoRouter createRouter(AuthCubit authCubit) {
         builder: (_, __, navigationShell) => MultiBlocProvider(
           providers: [
             BlocProvider.value(value: getIt<FavoritesCubit>()),
-            BlocProvider.value(value: getIt<ProfileCubit>()),
+            BlocProvider.value(value: getIt<ProfileCubit>(instanceName: 'myProfile')),
           ],
           child: ScaffoldWithBottomNav(navigationShell: navigationShell),
         ),
