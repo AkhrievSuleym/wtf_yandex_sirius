@@ -12,20 +12,28 @@ class WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final gradientColors = isDark
+        ? [
+            AppColors.memeGradientStart,
+            AppColors.memeGradientMid,
+            AppColors.memeGradientEnd,
+          ]
+        : [
+            const Color(0xFFFDFBFF),
+            const Color(0xFFF3EDFF),
+            const Color(0xFFEBE0FF),
+          ];
 
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.memeGradientStart,
-              AppColors.memeGradientMid,
-              AppColors.memeGradientEnd,
-            ],
+            colors: gradientColors,
           ),
         ),
         child: SafeArea(
@@ -39,6 +47,7 @@ class WelcomePage extends StatelessWidget {
                   width: 108,
                   height: 108,
                   fit: BoxFit.contain,
+                  color: isDark ? null : AppColors.primary,
                 )
                     .animate()
                     .fadeIn(duration: 400.ms)
@@ -46,7 +55,9 @@ class WelcomePage extends StatelessWidget {
                 const SizedBox(height: 32),
                 Text(
                   'What They Feel',
-                  style: theme.textTheme.headlineMedium,
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.primary,
+                  ),
                   textAlign: TextAlign.center,
                 )
                     .animate(delay: 200.ms)
@@ -56,8 +67,8 @@ class WelcomePage extends StatelessWidget {
                 Text(
                   'Анонимные сообщения.\nЧестная обратная связь.',
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.brightness == Brightness.dark
-                        ? AppColors.textPrimaryDark
+                    color: isDark
+                        ? AppColors.textPrimaryDark.withValues(alpha: 0.7)
                         : AppColors.textSecondaryLight,
                   ),
                   textAlign: TextAlign.center,
@@ -93,12 +104,15 @@ class WelcomePage extends StatelessWidget {
 }
 
 class WelcomePagePreview extends StatelessWidget {
-  const WelcomePagePreview({super.key});
+  final ThemeMode themeMode;
+  const WelcomePagePreview({super.key, this.themeMode = ThemeMode.system});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: AppTheme.dark,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: themeMode,
       home: const WelcomePage(),
     );
   }
