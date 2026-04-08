@@ -90,7 +90,7 @@ class CommentCard extends StatelessWidget {
       case _CommentKind.mine:
       case _CommentKind.boardOwnerAuthor:
       case _CommentKind.other:
-        return AppColors.textPrimaryDark;
+        return AppColors.ink;
     }
   }
 
