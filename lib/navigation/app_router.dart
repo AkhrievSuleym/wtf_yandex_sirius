@@ -164,8 +164,11 @@ GoRouter createRouter(AuthCubit authCubit) {
                   GoRoute(
                     path: ':uid',
                     name: RouteNames.publicProfile,
-                    builder: (_, state) => BlocProvider(
-                      create: (_) => getIt<BoardCubit>(),
+                    builder: (_, state) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(create: (_) => getIt<BoardCubit>()),
+                        BlocProvider(create: (_) => getIt<ProfileCubit>()),
+                      ],
                       child: PublicProfilePage(
                         uid: state.pathParameters['uid']!,
                       ),
@@ -197,8 +200,11 @@ GoRouter createRouter(AuthCubit authCubit) {
                 routes: [
                   GoRoute(
                     path: ':uid',
-                    builder: (_, state) => BlocProvider(
-                      create: (_) => getIt<BoardCubit>(),
+                    builder: (_, state) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(create: (_) => getIt<BoardCubit>()),
+                        BlocProvider(create: (_) => getIt<ProfileCubit>()),
+                      ],
                       child: PublicProfilePage(
                         uid: state.pathParameters['uid']!,
                       ),
