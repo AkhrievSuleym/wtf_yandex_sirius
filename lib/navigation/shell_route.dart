@@ -32,6 +32,7 @@ class _ScaffoldWithBottomNavState extends State<ScaffoldWithBottomNav> {
   ];
 
   late final ConnectivityService _connectivity;
+  late final StreamSubscription<bool> _sub;
   bool _isOnline = true;
 
   @override
@@ -39,9 +40,15 @@ class _ScaffoldWithBottomNavState extends State<ScaffoldWithBottomNav> {
     super.initState();
     _connectivity = getIt<ConnectivityService>();
     _isOnline = _connectivity.isOnline;
-    _connectivity.onStatusChange.listen((online) {
+    _sub = _connectivity.onStatusChange.listen((online) {
       if (mounted) setState(() => _isOnline = online);
     });
+  }
+
+  @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
   }
 
   @override
@@ -83,9 +90,11 @@ class _OfflineBanner extends StatelessWidget {
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
+      alignment: Alignment.topCenter,
       child: isOnline
-          ? const SizedBox.shrink()
+          ? SizedBox(key: const ValueKey('online'), width: double.infinity)
           : Container(
+              key: const ValueKey('offline'),
               width: double.infinity,
               color: const Color(0xFF2C2C2E),
               padding: EdgeInsets.only(
