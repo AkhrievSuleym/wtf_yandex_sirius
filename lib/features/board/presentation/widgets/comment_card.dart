@@ -83,6 +83,17 @@ class CommentCard extends StatelessWidget {
     }
   }
 
+  Color _getRoleLabelColor() {
+    switch (_kind) {
+      case _CommentKind.anonymous:
+        return AppColors.ink;
+      case _CommentKind.mine:
+      case _CommentKind.boardOwnerAuthor:
+      case _CommentKind.other:
+        return AppColors.textPrimaryDark;
+    }
+  }
+
   void _openDetail(BuildContext context) {
     context.push(
       '/comments/${comment.id}',
@@ -151,10 +162,10 @@ class CommentCard extends StatelessWidget {
                             ),
                             child: Text(
                               _roleLabel,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.ink,
+                                color: _getRoleLabelColor(),
                               ),
                             ),
                           ),
@@ -182,7 +193,7 @@ class CommentCard extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.ink,
+                                color: AppColors.secondary,
                               ),
                             ),
                           ),
@@ -227,7 +238,9 @@ class CommentCard extends StatelessWidget {
                         Text(
                           '${comment.replyCount}',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondaryDark,
+                            color: theme.brightness == Brightness.dark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textSecondaryLight,
                           ),
                         ),
                       ],
