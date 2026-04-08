@@ -172,8 +172,8 @@ class CommentCard extends StatelessWidget {
                                   AppColors.secondary.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: AppColors.secondary
-                                    .withValues(alpha: 0.45),
+                                color:
+                                    AppColors.secondary.withValues(alpha: 0.45),
                                 width: 1.25,
                               ),
                             ),
