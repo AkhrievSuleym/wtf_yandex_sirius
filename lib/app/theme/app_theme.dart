@@ -195,8 +195,7 @@ class AppTheme {
         elevation: 0,
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor:
-            isLight ? AppColors.primary : AppColors.primaryDark,
+        backgroundColor: isLight ? AppColors.primary : AppColors.primaryDark,
         foregroundColor: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(

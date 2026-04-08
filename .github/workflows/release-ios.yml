@@ -1,0 +1,53 @@
+name: Release iOS
+
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: release-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-ios:
+    name: Build iOS IPA
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Determine dependency manager
+        id: detect-manager
+        run: |
+          if [ -f "ios/Podfile" ]; then
+            echo "manager=cocoapods" >> $GITHUB_OUTPUT
+          elif [ -f "ios/Package.swift" ]; then
+            echo "manager=spm" >> $GITHUB_OUTPUT
+          else
+            echo "manager=none" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install CocoaPods
+        if: steps.detect-manager.outputs.manager == 'cocoapods'
+        run: cd ios && pod install && cd ..
+
+      - name: Build iOS (no codesign)
+        run: flutter build ipa --release --no-codesign
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/ios/ipa/*.ipa
