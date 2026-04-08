@@ -83,15 +83,11 @@ class CommentCard extends StatelessWidget {
     }
   }
 
-  Color _getRoleLabelColor() {
-    switch (_kind) {
-      case _CommentKind.anonymous:
-        return AppColors.ink;
-      case _CommentKind.mine:
-      case _CommentKind.boardOwnerAuthor:
-      case _CommentKind.other:
-        return AppColors.ink;
+  Color _getRoleLabelColor(BuildContext context) {
+    if (Theme.of(context).brightness == Brightness.dark) {
+      return Colors.white;
     }
+    return AppColors.ink;
   }
 
   void _openDetail(BuildContext context) {
@@ -165,7 +161,7 @@ class CommentCard extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
-                                color: _getRoleLabelColor(),
+                                color: _getRoleLabelColor(context),
                               ),
                             ),
                           ),
