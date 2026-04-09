@@ -20,9 +20,16 @@ class ConnectivityService {
   }
 
   Future<void> _init() async {
+    await forceCheck();
+  }
+
+  Future<void> forceCheck() async {
     final results = await _connectivity.checkConnectivity();
-    _isOnline = results.any((r) => r != ConnectivityResult.none);
-    _controller.add(_isOnline);
+    final online = results.any((r) => r != ConnectivityResult.none);
+    if (online != _isOnline) {
+      _isOnline = online;
+      _controller.add(_isOnline);
+    }
   }
 
   bool get isOnline => _isOnline;

@@ -73,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 40),
                   AppTextField(
                     label: 'Никнейм',
-                    hint: 'ваш_ник',
+                    hint: 'Ваш ник',
                     controller: _usernameController,
                     textInputAction: TextInputAction.next,
                     validator: (v) {

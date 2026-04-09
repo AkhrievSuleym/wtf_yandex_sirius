@@ -132,7 +132,8 @@ GoRouter createRouter(AuthCubit authCubit) {
         builder: (_, __, navigationShell) => MultiBlocProvider(
           providers: [
             BlocProvider.value(value: getIt<FavoritesCubit>()),
-            BlocProvider.value(value: getIt<ProfileCubit>()),
+            BlocProvider.value(
+                value: getIt<ProfileCubit>(instanceName: 'myProfile')),
           ],
           child: ScaffoldWithBottomNav(navigationShell: navigationShell),
         ),
@@ -164,8 +165,11 @@ GoRouter createRouter(AuthCubit authCubit) {
                   GoRoute(
                     path: ':uid',
                     name: RouteNames.publicProfile,
-                    builder: (_, state) => BlocProvider(
-                      create: (_) => getIt<BoardCubit>(),
+                    builder: (_, state) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(create: (_) => getIt<BoardCubit>()),
+                        BlocProvider(create: (_) => getIt<ProfileCubit>()),
+                      ],
                       child: PublicProfilePage(
                         uid: state.pathParameters['uid']!,
                       ),
@@ -197,8 +201,11 @@ GoRouter createRouter(AuthCubit authCubit) {
                 routes: [
                   GoRoute(
                     path: ':uid',
-                    builder: (_, state) => BlocProvider(
-                      create: (_) => getIt<BoardCubit>(),
+                    builder: (_, state) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(create: (_) => getIt<BoardCubit>()),
+                        BlocProvider(create: (_) => getIt<ProfileCubit>()),
+                      ],
                       child: PublicProfilePage(
                         uid: state.pathParameters['uid']!,
                       ),

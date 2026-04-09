@@ -85,6 +85,10 @@ Future<void> setupDependencies() async {
   );
   getIt.registerLazySingleton<ProfileCubit>(
     () => ProfileCubit(getIt<ProfileRepository>()),
+    instanceName: 'myProfile',
+  );
+  getIt.registerFactory<ProfileCubit>(
+    () => ProfileCubit(getIt<ProfileRepository>()),
   );
   getIt.registerFactory<SearchCubit>(
     () => SearchCubit(
