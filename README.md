@@ -1,17 +1,199 @@
-# wtf_yandex_sirius
+# WTF Yandex Sirius
 
-A new Flutter project.
+**Стильное кроссплатформенное приложение для острых социальных взаимодействий**
 
-## Getting Started
+WTF Yandex Sirius - это кроссплатформенное мобильное приложение для обмена комментариями и социальных взаимодействий.
 
-This project is a starting point for a Flutter application.
+| ![iPhone 16 Screen 1](./docs/iPhone%2016%20Screen%201.png) | ![iPhone 16 Screen 2](./docs/iPhone%2016%20Screen%202.png) | ![iPhone 16 Screen 3](./docs/iPhone%2016%20Screen%203.png) | ![iPhone 16 Screen 4](./docs/iPhone%2016%20Screen%204.png) |
+|---|---|---|---|
 
-A few resources to get you started if this is your first Flutter project:
+[![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.0+-0175C2?logo=dart&logoColor=white)](https://dart.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Ключевые возможности ✨
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+**Анонимные комментарии**
+Пользователи могут отправлять и получать анонимные комментарии.
+
+**Реакции на комментарии**
+Возможность ставить реакции на комментарии.
+
+**Поиск пользователей**
+Поиск и просмотр профилей других пользователей.
+
+**Избранные профили**
+Добавление пользователей в избранное для быстрого доступа.
+
+**Управление профилем**
+Редактирование профиля и загрузка аватара.
+
+## Архитектура 💻
+
+Приложение использует feature-first архитектуру с чистым разделением на слои:
+
+```
+├── Presentation  — виджеты и Cubits для управления состоянием
+├── Domain        — бизнес-логика и use cases
+└── Data          — репозитории и источники данных
+```
+
+И с использованием следующих технологий:
+
+```
+├── BLoC (Business Logic Component) — для управления состоянием
+├── GetIt                           — для внедрения зависимостей
+├── GoRouter                        — для навигации
+├── Dio                             — для сетевых запросов
+├── SQFlite                         — для локального кэширования данных
+├── FlutterSecureStorage            — для безопасного хранения токенов
+└── SharedPreferences               — для локального хранения настроек
+```
+
+Структура проекта организована по фичам:
+
+```
+lib/
+├── app/                  # Основное приложение
+│   ├── app.dart          # Главный виджет приложения
+│   ├── di/               # Внедрение зависимостей
+│   └── theme/            # Темизация
+│
+├── core/                 # Общие компоненты
+│   ├── constants/        # Константы
+│   ├── error/            # Обработка ошибок
+│   ├── services/         # Сервисы
+│   ├── utils/            # Утилиты
+│   └── widgets/          # Общие виджеты
+│
+└── features/             # Функциональные модули
+    ├── auth/             # Аутентификация
+    ├── board/            # Лента комментариев
+    ├── comment/          # Комментарии
+    ├── favorites/        # Избранное
+    ├── profile/          # Профили
+    ├── search/           # Поиск
+    ├── deep_link/        # Глубокие ссылки
+    └── splash/           # Экран загрузки
+```
+
+## Техническая реализация 🛠️
+
+**Бэкенд и API**
+
+Собственный сервер на Go с PostgreSQL:
+- RESTful API для всех операций
+- JWT аутентификация
+- WebSocket для реального времени
+- Docker контейнеризация
+
+**Управление состоянием**
+
+Приложение использует BLoC-паттерн с Cubits для предсказуемого и тестируемого потока данных:
+
+- `AuthCubit` — управление аутентификацией и сессиями
+- `BoardCubit` — управление лентой комментариев
+- `CommentCubit` — управление комментариями
+- `SearchCubit` — обработка поисковых запросов
+- `FavoritesCubit` — управление избранным
+- `ProfileCubit` — работа с профилями
+
+**Навигация**
+
+GoRouter с поддержкой основных и вложенных маршрутов, `ShellRoute` для таб-навигации и глубоких ссылок (deep links).
+
+**Кэширование и хранение данных**
+
+Многоуровневая система хранения для обеспечения оффлайн-доступа:
+
+- `CommentCacheDb` (SQFlite) — локальное кэширование комментариев с ограничением размера
+- `SharedPreferences` — пользовательские предпочтения и настройки
+- `ApiClient` — кэширование JWT токенов и данных пользователя
+- **Backend**: Go сервер с PostgreSQL для основного хранения данных
+
+**Темизация**
+
+Поддержка светлой, тёмной и системной тем с сохранением выбора пользователя между сессиями.
+
+## Настройка проекта 📦
+
+Основные файлы конфигурации:
+
+- `lib/core/constants/api_constants.dart` - API endpoints
+- `lib/core/constants/firestore_collections.dart` - Имена коллекций Firestore
+- `lib/core/constants/app_constants.dart` - Общие константы
+
+**Системные требования**
+
+**Frontend:**
+- Flutter SDK 3.41.5 или выше
+- Android Studio / Xcode
+- Устройство или эмулятор с Android 7.0+ (API 24) / iOS 13.0+
+
+**Backend:**
+- Go 1.22
+- PostgreSQL 16
+- Docker
+
+## Установка и запуск
+
+### Frontend (Flutter)
+
+1. Клонируйте репозиторий:
+   ```bash
+   git clone https://github.com/your-repo/wtf_yandex_sirius.git
+   cd wtf_yandex_sirius
+   ```
+
+2. Установите зависимости:
+   ```bash
+   flutter pub get
+   ```
+
+3. Запустите приложение:
+   ```bash
+   flutter run
+   ```
+
+### Backend (Go)
+
+1. Перейдите в директорию backend:
+   ```bash
+   cd backend
+   ```
+
+2. Настройте переменные окружения:
+   ```bash
+   cp .env.example .env
+   # Отредактируйте .env файл
+   ```
+
+3. Запустите сервер:
+   ```bash
+   go run cmd/server/main.go
+   ```
+
+Или используйте Docker:
+   ```bash
+   docker-compose up --build
+   ```
+
+## Тестирование
+
+Приложение включает юнит-тесты и виджет-тесты:
+
+```bash
+# Запуск всех тестов
+flutter test
+
+# Запуск конкретных тестов
+flutter test test/features/auth/auth_cubit_test.dart
+```
+
+## Лицензия
+
+Проект распространяется под лицензией MIT. Подробности смотрите в файле [LICENSE](LICENSE).
+
+---
+
+Сделано командой WTF Yandex Sirius на Flutter.
