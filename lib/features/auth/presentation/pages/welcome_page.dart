@@ -47,7 +47,7 @@ class WelcomePage extends StatelessWidget {
                   width: 108,
                   height: 108,
                   fit: BoxFit.contain,
-                  color: isDark ? null : AppColors.primary,
+                  // color: isDark ? null : AppColors.primary,
                 )
                     .animate()
                     .fadeIn(duration: 400.ms)
