@@ -1,17 +1,179 @@
-# wtf_yandex_sirius
+# WTF Yandex Sirius
 
-A new Flutter project.
+**Стильное кроссплатформенное приложение для острых социальных взаимодействий**
 
-## Getting Started
+WTF Yandex Sirius - это кроссплатформенное мобильное приложение для обмена комментариями и социальных взаимодействий.
 
-This project is a starting point for a Flutter application.
+| ![iPhone 16 Screen 1](./docs/iPhone%2016%20Screen%201.png) | ![iPhone 16 Screen 2](./docs/iPhone%2016%20Screen%202.png) | ![iPhone 16 Screen 3](./docs/iPhone%2016%20Screen%203.png) | ![iPhone 16 Screen 4](./docs/iPhone%2016%20Screen%204.png) |
+|---|---|---|---|
 
-A few resources to get you started if this is your first Flutter project:
+[![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.0+-0175C2?logo=dart&logoColor=white)](https://dart.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Ключевые возможности ✨
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+**Социальная лента комментариев**
+
+Плавная прокрутка комментариев в реальном времени с автоматической подгрузкой нового контента. Система оптимистичных обновлений обеспечивает мгновенную реакцию интерфейса на действия пользователя, даже при медленном интернет-соединении.
+
+**Безопасная аутентификация**
+
+Поддержка анонимной регистрации и авторизации по паролю. Токены доступа безопасно хранятся в FlutterSecureStorage, обеспечивая защиту пользовательских данных.
+
+**Система реакций на комментарии**
+
+Возможность ставить и убирать реакции на комментарии прямо в ленте. Все изменения мгновенно синхронизируются с сервером, а состояние реакций сохраняется локально для оффлайн-режима.
+
+**Умный поиск пользователей**
+
+Поиск пользователей по имени с историей поиска и автоматической подгрузкой результатов. Встроенный дебаунсинг запросов оптимизирует нагрузку на сервер и улучшает пользовательский опыт.
+
+**Управление избранным**
+
+Добавление пользователей в избранное и управление списком избранных профилей с обновлениями в реальном времени без необходимости ручного рефреша.
+
+**Редактирование профиля**
+
+Полноценное управление профилем: загрузка аватара, редактирование информации, проверка доступности имени пользователя. Все изменения синхронизируются с сервером в реальном времени.
+
+## Архитектура
+
+Приложение построено по принципам чистой архитектуры с разделением на слои:
+
+```
+├── Presentation  — виджеты и Cubits для управления состоянием
+├── Domain        — бизнес-логика и use cases
+└── Data          — репозитории и источники данных
+```
+
+И с использованием следующих технологий:
+
+```
+├── BLoC (Business Logic Component) — для управления состоянием
+├── GetIt                           — для внедрения зависимостей
+├── GoRouter                        — для навигации
+├── Dio                             — для сетевых запросов
+├── SharedPreferences               — для локального хранения
+└── FlutterSecureStorage            — для безопасного хранения токенов
+```
+
+Структура проекта организована по фичам:
+
+```
+lib/
+├── app/                  # Основное приложение
+│   ├── app.dart          # Главный виджет приложения
+│   ├── di/               # Внедрение зависимостей
+│   └── theme/            # Темизация
+│
+├── core/                 # Общие компоненты
+│   ├── constants/        # Константы
+│   ├── error/            # Обработка ошибок
+│   ├── services/         # Сервисы
+│   ├── utils/            # Утилиты
+│   └── widgets/          # Общие виджеты
+│
+└── features/             # Функциональные модули
+    ├── auth/             # Аутентификация
+    ├── board/            # Лента комментариев
+    ├── comment/          # Комментарии
+    ├── favorites/        # Избранное
+    ├── profile/          # Профили
+    ├── search/           # Поиск
+    ├── deep_link/        # Глубокие ссылки
+    └── splash/           # Экран загрузки
+```
+
+## Стек технологий 💻
+
+```
+├── Flutter              — кроссплатформенный UI-фреймворк
+├── BLoC                 — управление состоянием
+├── GetIt                — внедрение зависимостей
+├── GoRouter             — декларативная навигация
+├── Dio                  — HTTP-клиент
+├── SharedPreferences    — локальное хранилище
+└── FlutterSecureStorage — безопасное хранилище токенов
+```
+
+## Техническая реализация 🛠️
+
+**Управление состоянием**
+
+Приложение использует BLoC-паттерн с Cubits для предсказуемого и тестируемого потока данных:
+
+- `AuthCubit` — управление аутентификацией и сессиями
+- `BoardCubit` — управление лентой комментариев
+- `CommentCubit` — управление комментариями
+- `SearchCubit` — обработка поисковых запросов
+- `FavoritesCubit` — управление избранным
+- `ProfileCubit` — работа с профилями
+
+**Навигация**
+
+GoRouter с поддержкой основных и вложенных маршрутов, `ShellRoute` для таб-навигации и глубоких ссылок (deep links).
+
+**Кэширование**
+
+Многоуровневая система кэширования для обеспечения оффлайн-доступа:
+
+- `CommentCacheDb` — локальное хранение комментариев
+- `SharedPreferences` — пользовательские предпочтения
+- `ApiClient` — кэширование токенов и данных пользователя
+
+**Темизация**
+
+Поддержка светлой, тёмной и системной тем с сохранением выбора пользователя между сессиями.
+
+## Настройка проекта 📦
+
+Основные файлы конфигурации:
+
+- `lib/core/constants/api_constants.dart` - API endpoints
+- `lib/core/constants/firestore_collections.dart` - Имена коллекций Firestore
+- `lib/core/constants/app_constants.dart` - Общие константы
+
+**Системные требования**
+
+- Flutter SDK 3.0 или выше
+- Android Studio / Xcode
+- Устройство или эмулятор с Android 6.0+ / iOS 11.0+
+
+## Установка и запуск
+
+1. Клонируйте репозиторий:
+   ```bash
+   git clone https://github.com/your-repo/wtf_yandex_sirius.git
+   cd wtf_yandex_sirius
+   ```
+
+2. Установите зависимости:
+   ```bash
+   flutter pub get
+   ```
+
+3. Запустите приложение:
+   ```bash
+   flutter run
+   ```
+
+## Тестирование
+
+Приложение включает юнит-тесты и виджет-тесты:
+
+```bash
+# Запуск всех тестов
+flutter test
+
+# Запуск конкретных тестов
+flutter test test/features/auth/auth_cubit_test.dart
+```
+
+## Лицензия
+
+Проект распространяется под лицензией MIT. Подробности смотрите в файле [LICENSE](LICENSE).
+
+---
+
+Сделано командой WTF Yandex Sirius на Flutter.
