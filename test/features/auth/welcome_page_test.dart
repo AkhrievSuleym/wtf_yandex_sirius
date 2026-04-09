@@ -4,7 +4,8 @@ import 'package:wtf_yandex_sirius/features/auth/presentation/pages/welcome_page.
 import 'package:wtf_yandex_sirius/app/theme/app_theme.dart';
 
 void main() {
-  testWidgets('WelcomePage renders title and buttons', (WidgetTester tester) async {
+  testWidgets('WelcomePage renders title and buttons',
+      (WidgetTester tester) async {
     // Build the widget
     await tester.pumpWidget(
       MaterialApp(

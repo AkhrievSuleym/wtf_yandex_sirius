@@ -16,7 +16,8 @@ void main() {
     isRead: true,
   );
 
-  testWidgets('CommentCard displays text and "Ты" label for current user', (WidgetTester tester) async {
+  testWidgets('CommentCard displays text and "Ты" label for current user',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.light,
@@ -35,7 +36,8 @@ void main() {
     expect(find.text('Ты'), findsOneWidget);
   });
 
-  testWidgets('CommentCard displays "Анонимно" for null authorId', (WidgetTester tester) async {
+  testWidgets('CommentCard displays "Анонимно" for null authorId',
+      (WidgetTester tester) async {
     final anonComment = CommentModel(
       id: '2',
       boardOwnerId: 'owner_123',
@@ -46,7 +48,7 @@ void main() {
       reactedBy: CommentModel.emptyReactedBy,
       isRead: true,
     );
-    
+
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.light,
@@ -64,7 +66,8 @@ void main() {
     expect(find.text('Анонимно'), findsOneWidget);
   });
 
-  testWidgets('CommentCard displays "Владелец доски" for board owner', (WidgetTester tester) async {
+  testWidgets('CommentCard displays "Владелец доски" for board owner',
+      (WidgetTester tester) async {
     final ownerComment = CommentModel(
       id: '3',
       boardOwnerId: 'owner_123',
@@ -75,7 +78,7 @@ void main() {
       reactedBy: CommentModel.emptyReactedBy,
       isRead: true,
     );
-    
+
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.light,

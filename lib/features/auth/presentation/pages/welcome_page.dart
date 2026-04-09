@@ -56,7 +56,8 @@ class WelcomePage extends StatelessWidget {
                 Text(
                   'What They Feel',
                   style: theme.textTheme.headlineMedium?.copyWith(
-                    color: isDark ? AppColors.textPrimaryDark : AppColors.primary,
+                    color:
+                        isDark ? AppColors.textPrimaryDark : AppColors.primary,
                   ),
                   textAlign: TextAlign.center,
                 )

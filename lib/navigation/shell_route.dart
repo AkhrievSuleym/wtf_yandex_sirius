@@ -101,32 +101,32 @@ class _OfflineBanner extends StatelessWidget {
         color: const Color(0xFF2C2C2E),
         child: isOnline
             ? const SizedBox.shrink()
-          : SingleChildScrollView(
-              physics: const NeverScrollableScrollPhysics(),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: topPadding + 8.0,
-                  bottom: 8.0,
-                  left: 16.0,
-                  right: 16.0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.wifi_off_rounded,
-                        size: 14, color: Colors.white70),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Нет подключения — показываем кеш',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Colors.white70,
-                            fontWeight: FontWeight.w500,
-                          ),
-                    ),
-                  ],
+            : SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: topPadding + 8.0,
+                    bottom: 8.0,
+                    left: 16.0,
+                    right: 16.0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.wifi_off_rounded,
+                          size: 14, color: Colors.white70),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Нет подключения — показываем кеш',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Colors.white70,
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
       ),
     );
   }
