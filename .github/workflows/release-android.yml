@@ -30,7 +30,7 @@ jobs:
         run: flutter pub get
 
       - name: Build APK (unsigned)
-        run: flutter build apk --release
+        run: flutter build apk --release --dart-define=API_BASE_URL=http://213.165.209.126:8080
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
