@@ -45,7 +45,9 @@ jobs:
         run: cd ios && pod install && cd ..
 
       - name: Build iOS (no codesign)
-        run: flutter build ipa --release --no-codesign
+        run: >
+          flutter build ipa --release --no-codesign
+          --dart-define=API_BASE_URL=http://213.165.209.126:8080
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
